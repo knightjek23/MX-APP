@@ -1,0 +1,9 @@
+# TODO (Prompt 6): On PR — pnpm install, lint, typecheck, vitest, build.
+name: CI
+on:
+  pull_request:
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - run: echo 'placeholder — fill in per PROJECT.md §9 Prompt 6'
