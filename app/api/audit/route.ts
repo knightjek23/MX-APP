@@ -37,7 +37,7 @@ import { getSupabaseClient } from "@/lib/db/supabase";
 import { getAuditRateLimit, hashIp, getClientIp } from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 
-const MAX_FRAMES = 50;
+const MAX_FRAMES = Number(process.env.AUDIT_MAX_FRAMES) || 50;
 
 const RequestSchema = z.object({
   figma_url: z.string().min(1, "Figma URL is required."),
