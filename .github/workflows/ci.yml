@@ -1,9 +1,58 @@
-# TODO (Prompt 6): On PR — pnpm install, lint, typecheck, vitest, build.
 name: CI
+
 on:
   pull_request:
+  push:
+    branches: [main]
+
+# Cancel in-flight runs on the same branch when a new one starts.
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   check:
+    name: Lint, typecheck, test, build
     runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    # Build-time env vars. None of these are real secrets — they're just
+    # values that satisfy module-load checks during Next's prerender pass.
+    # Real values are injected by Vercel at deploy time.
+    env:
+      ANTHROPIC_API_KEY: ci-placeholder
+      SUPABASE_URL: https://ci-placeholder.supabase.co
+      SUPABASE_SERVICE_ROLE_KEY: ci-placeholder
+      UPSTASH_REDIS_REST_URL: https://ci-placeholder.upstash.io
+      UPSTASH_REDIS_REST_TOKEN: ci-placeholder
+      NEXT_PUBLIC_APP_URL: http://localhost:3000
+
     steps:
-      - run: echo 'placeholder — fill in per PROJECT.md §9 Prompt 6'
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 9
+
+      - name: Set up Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Lint
+        run: pnpm lint
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Test (vitest)
+        run: pnpm test
+
+      - name: Build
+        run: pnpm build
