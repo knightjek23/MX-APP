@@ -3,6 +3,9 @@
 /**
  * FilterChips — category filter for the annotation list.
  * Controlled by the parent AnnotationsSection.
+ *
+ * Accepts a `categoryLabels` prop so chip labels can match the active
+ * Design / Engineer view (the same enum maps to different vocabularies).
  */
 
 import type { Category } from "@/lib/types/audit";
@@ -10,26 +13,15 @@ import type { Category } from "@/lib/types/audit";
 interface Props {
   allCount: number;
   categoryCounts: Partial<Record<Category, number>>;
+  categoryLabels: Record<Category, string>;
   activeCategory: Category | "all";
   onChange: (c: Category | "all") => void;
 }
 
-const CATEGORY_LABELS: Record<Category, string> = {
-  semantic_html: "Semantic HTML",
-  aria: "ARIA",
-  schema: "Schema",
-  hidden_content: "Hidden content",
-  entity: "Entity",
-  initial_html: "Initial HTML",
-  contrast: "Contrast",
-  personalization: "Personalization",
-  empty_state: "Empty state",
-  figma_export: "Figma export",
-};
-
 export function FilterChips({
   allCount,
   categoryCounts,
+  categoryLabels,
   activeCategory,
   onChange,
 }: Props) {
@@ -60,7 +52,7 @@ export function FilterChips({
           onClick={() => onChange(c)}
           className={chipClass(activeCategory === c)}
         >
-          {CATEGORY_LABELS[c]} · {categoryCounts[c]}
+          {categoryLabels[c]} · {categoryCounts[c]}
         </button>
       ))}
     </div>

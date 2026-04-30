@@ -40,8 +40,73 @@ Priority:
 - P2: agent misinterprets (ambiguous CTAs, missing entity metadata, unbound personalization)
 - P3: agent has less context than ideal (missing schema, no datetime attr, no zero-states)
 
-Call the \`submit_audit\` tool with your audit. The tool's input schema defines the
-exact shape — do not produce prose before, after, or instead of the tool call.
+DUAL VIEW REQUIREMENT — every annotation must include FOUR fields:
+
+1. design_recommendation + design_rationale — written for the DESIGNER who made
+   the file. Use designer vocabulary only: frames, layers, components, design
+   system, naming, structure, hierarchy, handoff annotations, dev mode notes.
+   Action verbs: rename, label, restructure, document, add to design system,
+   tag for handoff, mark as [pattern], create [pattern]. NEVER include HTML
+   element names (header, nav, main, button, a, etc.), ARIA attributes, schema
+   types, or code snippets in these fields.
+
+2. recommendation + rationale + code_hint — written for the DEVELOPER who will
+   implement it. Use technical vocabulary: HTML elements, ARIA, schema markup,
+   JSON-LD, JS rendering. Provide copy-pasteable code in code_hint where
+   applicable.
+
+The two views describe the same issue from different angles. They must be
+complementary, not redundant. The designer view explains WHAT decision the
+designer needs to make and HOW to communicate it for handoff. The engineer
+view explains the technical implementation.
+
+EXAMPLE — missing main landmark:
+
+design_recommendation: "Mark this frame as your page's primary content
+region. Add a 'Main content' label in your design system or annotate the
+frame in your dev handoff notes so the developer knows this is the
+top-level wrapper for the page's main story."
+
+design_rationale: "AI agents look for a clearly-identified main content
+region the way humans look for a hero — it tells them where the page's
+important content lives. Without that mark, your design reads as one
+undifferentiated block and the agent gives up or gets it wrong."
+
+recommendation: "Wrap the entire frame in a <main> landmark element to
+provide a primary content region that agents can identify and navigate to
+directly."
+
+rationale: "Agents locate primary content via the <main> landmark.
+Without it, they fall back to vision-only parsing and task success drops
+to the ~28% range."
+
+code_hint: "<main>...page content...</main>"
+
+EXAMPLE — sidebar nav as div soup:
+
+design_recommendation: "Treat this sidebar as a Navigation component, not
+a layout group. Apply your design system's Navigation pattern, ensure
+each item is clearly a link (not generic text), and document the
+wayfinding role in your handoff notes."
+
+design_rationale: "AI agents need to recognize navigation to know how to
+move around your product. A styled group of text frames reads as
+decorative content — agents miss it entirely or misinterpret what each
+item is for."
+
+recommendation: "Wrap the sidebar links in <nav aria-label='Primary'>
+and make each item an <a href> for navigation or a <button> for
+in-place view changes."
+
+rationale: "Agents enumerate destinations via <a href> inside <nav>
+landmarks. Div soup forces vision-only fallback and drops task
+success significantly."
+
+code_hint: "<nav aria-label=\\"Primary\\"><ul><li><a href=\\"/dashboard\\">Dashboard</a></li>...</ul></nav>"
+
+Call the \`submit_audit\` tool with your audit. The tool's input schema defines
+the exact shape — do not produce prose before, after, or instead of the tool
+call.
 
 Rules:
 - Never recommend ARIA that duplicates native HTML semantics (no div role="button")
@@ -51,4 +116,6 @@ Rules:
 - If you cannot tell whether a string is bound or literal, flag as P2 personalization
 - Compute overall_score using the log-curve formula: score = max(0, 100 -
   ceil(log2(p1 + 1) * 12) - (p2 * 3) - (p3 * 1)). This keeps discrimination across
-  the full range from a clean frame to a severely broken one.`;
+  the full range from a clean frame to a severely broken one.
+- Both designer view fields and engineer view fields are REQUIRED for every
+  annotation. Do not omit them, even when they would be similar.`;

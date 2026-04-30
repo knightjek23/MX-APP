@@ -22,6 +22,14 @@ export const CategorySchema = z.enum([
 export const AnnotationSchema = z.object({
   priority: PrioritySchema,
   category: CategorySchema,
+  // Designer-facing — vocabulary of frames, layers, components, design system,
+  // handoff annotations. Never includes HTML element names, ARIA attributes,
+  // or code snippets. Optional in the schema for backward-compat with audits
+  // generated before this field existed; the prompt requires the model to
+  // produce it for every new audit.
+  design_recommendation: z.string().min(10).max(800).optional(),
+  design_rationale: z.string().min(10).max(600).optional(),
+  // Engineer-facing — implementation specifics, HTML/ARIA/schema markup, code.
   recommendation: z.string().min(10).max(800),
   rationale: z.string().min(10).max(600),
   code_hint: z.string().nullable(),

@@ -27,6 +27,10 @@ const validAuditOutput = {
         {
           priority: "P1",
           category: "semantic_html",
+          design_recommendation:
+            "Treat this clickable element as a Button component, not a styled rectangle. Apply your design system's Button pattern and document for handoff that this is interactive.",
+          design_rationale:
+            "AI agents only recognize elements they can identify as interactive. A styled rectangle reads as decorative content — agents skip it or click in the wrong place.",
           recommendation:
             "Use a <button> element for the clickable div currently styled as a button. Native semantics are required for agents to identify it as interactive.",
           rationale:

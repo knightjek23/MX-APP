@@ -1,22 +1,26 @@
 "use client";
 
 /**
- * AnnotationCard — one audit annotation with:
- * - priority pill (P1/P2/P3 semantic colors)
- * - category label + "N of total" counter
- * - recommendation as headline
- * - rationale as body
- * - collapsible "Suggested markup" code block with copy button
+ * AnnotationCard — one audit annotation, rendered for either Designer or
+ * Engineer view based on the `view` prop.
+ *
+ * Designer view: design_recommendation + design_rationale. No code section.
+ * Engineer view: recommendation + rationale + collapsible code_hint.
+ *
+ * Falls back gracefully for old audits (pre-dual-view) that lack the
+ * design_* fields — those fall back to engineer copy with a small note.
  */
 
 import { useState } from "react";
 import { Check, Copy, ChevronDown, ChevronUp } from "lucide-react";
 import type { Annotation, Category, Priority } from "@/lib/types/audit";
+import type { AnnotationView } from "./view-toggle";
 
 interface Props {
   annotation: Annotation;
   index: number;
   total: number;
+  view: AnnotationView;
   defaultExpanded?: boolean;
 }
 
@@ -31,6 +35,20 @@ const CATEGORY_LABELS: Record<Category, string> = {
   personalization: "Personalization",
   empty_state: "Empty state",
   figma_export: "Figma export",
+};
+
+// Designer-friendly category labels for Design view. Same enum, plain language.
+const CATEGORY_LABELS_DESIGN: Record<Category, string> = {
+  semantic_html: "Page structure",
+  aria: "Accessibility labels",
+  schema: "Content type",
+  hidden_content: "Hidden content",
+  entity: "Naming consistency",
+  initial_html: "Page load",
+  contrast: "Contrast",
+  personalization: "Dynamic content",
+  empty_state: "Empty states",
+  figma_export: "Export risk",
 };
 
 const PRIORITY_STYLES: Record<Priority, { bg: string; text: string }> = {
@@ -52,6 +70,7 @@ export function AnnotationCard({
   annotation,
   index,
   total,
+  view,
   defaultExpanded = false,
 }: Props) {
   const [expanded, setExpanded] = useState(defaultExpanded);
@@ -59,6 +78,27 @@ export function AnnotationCard({
 
   const priority = PRIORITY_STYLES[annotation.priority];
   const hasCode = annotation.code_hint && annotation.code_hint.trim().length > 0;
+
+  // Pick the right copy for the active view. If design view is selected but
+  // the audit predates the dual-view feature, fall back to engineer copy.
+  const isDesignView = view === "design";
+  const designCopyMissing = isDesignView &&
+    (!annotation.design_recommendation || !annotation.design_rationale);
+
+  const recommendation = isDesignView && annotation.design_recommendation
+    ? annotation.design_recommendation
+    : annotation.recommendation;
+
+  const rationale = isDesignView && annotation.design_rationale
+    ? annotation.design_rationale
+    : annotation.rationale;
+
+  const categoryLabel = isDesignView
+    ? CATEGORY_LABELS_DESIGN[annotation.category]
+    : CATEGORY_LABELS[annotation.category];
+
+  // Code section only shows in engineer view. Designers don't write code.
+  const showCodeSection = !isDesignView && hasCode;
 
   const copy = async () => {
     if (!annotation.code_hint) return;
@@ -81,7 +121,7 @@ export function AnnotationCard({
             {annotation.priority}
           </span>
           <span className="text-neutral-500 dark:text-neutral-400">
-            {CATEGORY_LABELS[annotation.category]}
+            {categoryLabel}
           </span>
           <span className="text-neutral-400 dark:text-neutral-500 ml-auto">
             {index + 1} of {total}
@@ -89,14 +129,20 @@ export function AnnotationCard({
         </div>
 
         <h3 className="text-[15px] font-medium text-neutral-900 dark:text-neutral-100 leading-snug mb-1.5">
-          {annotation.recommendation}
+          {recommendation}
         </h3>
         <p className="text-[13px] text-neutral-600 dark:text-neutral-400 leading-relaxed">
-          {annotation.rationale}
+          {rationale}
         </p>
+
+        {designCopyMissing && (
+          <p className="mt-3 text-[11px] text-neutral-500 dark:text-neutral-500 italic">
+            Showing engineer view — this audit was generated before the design view existed. Re-run to see designer-facing copy.
+          </p>
+        )}
       </div>
 
-      {hasCode && (
+      {showCodeSection && (
         <div className="border-t border-neutral-200/70 dark:border-neutral-800">
           <button
             type="button"
