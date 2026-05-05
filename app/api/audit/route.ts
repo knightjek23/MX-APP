@@ -187,6 +187,11 @@ export async function POST(request: NextRequest) {
       },
       error: null,
       user_ip_hash: ipHash,
+      // user_id is set in T4 once Clerk auth gates this route. For now,
+      // new audits during the transition still go in as null — same as
+      // pre-auth historical rows. Routing change in T4 swaps this for
+      // the actual Clerk userId.
+      user_id: null,
     });
 
     // 9. Return slug

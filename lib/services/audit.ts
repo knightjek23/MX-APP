@@ -25,7 +25,14 @@ export interface AuditRecord {
   cost_usd: number;
   audit_json: AuditResult;
   error: string | null;
+  // SHA-256 of the client IP, stored for older anonymous audits. Nullable
+  // for new audits where rate limiting keys on user_id instead. Kept on
+  // the type for backward compatibility with rows persisted before auth.
   user_ip_hash: string | null;
+  // Clerk user identifier (e.g. "user_2abc..."). Null for audits created
+  // before authentication landed. New audits always have a value because
+  // the audit route is gated by auth middleware.
+  user_id: string | null;
 }
 
 export interface StoredAudit extends AuditRecord {
