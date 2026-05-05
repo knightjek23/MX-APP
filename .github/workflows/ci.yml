@@ -25,6 +25,11 @@ jobs:
       SUPABASE_SERVICE_ROLE_KEY: ci-placeholder
       UPSTASH_REDIS_REST_URL: https://ci-placeholder.upstash.io
       UPSTASH_REDIS_REST_TOKEN: ci-placeholder
+      AUDIT_RATE_LIMIT_PER_HOUR: "20"
+      # Clerk uses test_-prefixed keys that satisfy build-time validation
+      # without authenticating against a real Clerk instance.
+      NEXT_PUBLIC_CLERK_PUBLISHABLE_KEY: pk_test_Y2lwbGFjZWhvbGRlci5jbGVyay5hY2NvdW50cy5kZXYk
+      CLERK_SECRET_KEY: sk_test_ci_placeholder
       NEXT_PUBLIC_APP_URL: http://localhost:3000
 
     steps:
