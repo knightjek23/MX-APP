@@ -95,4 +95,37 @@ export class AuditService {
 
     return (data as StoredAudit | null) ?? null;
   }
+
+  /**
+   * List audits owned by a specific user, ordered most-recent first.
+   *
+   * Used by the /audits dashboard. Filters on the partial index added in
+   * migration 002, so anonymous historical rows (user_id IS NULL) never
+   * appear in any user's list.
+   *
+   * @param userId  Clerk user identifier (e.g. "user_2abc...")
+   * @param opts.limit  Max results to return. Defaults to 50.
+   */
+  async listByUser(
+    userId: string,
+    opts: { limit?: number } = {}
+  ): Promise<StoredAudit[]> {
+    const limit = opts.limit ?? 50;
+    const { data, error } = await this.db
+      .from("audits")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      logger.error("audit.listByUser.failed", {
+        userId,
+        error: error.message,
+      });
+      throw new AuditFetchError(error.message);
+    }
+
+    return (data as StoredAudit[] | null) ?? [];
+  }
 }
