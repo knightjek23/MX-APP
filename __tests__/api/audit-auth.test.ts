@@ -12,7 +12,7 @@
  * about the auth boundary.
  */
 
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, it, expect, vi, beforeEach, afterEach } from "vitest";
 import { NextRequest } from "next/server";
 
 // --- mocks ------------------------------------------------------------------
@@ -156,6 +156,15 @@ describe("POST /api/audit — auth boundary", () => {
       remaining: 19,
       reset: Date.now() + 3_600_000,
     });
+    // The route fails fast if ANTHROPIC_API_KEY is missing. We mock the
+    // ClaudeService class so this value is never actually used to call
+    // Anthropic — but the env check fires before reaching the constructor,
+    // so we need a non-empty placeholder for the route to proceed.
+    vi.stubEnv("ANTHROPIC_API_KEY", "sk-ant-test-placeholder");
+  });
+
+  afterEach(() => {
+    vi.unstubAllEnvs();
   });
 
   it("returns 401 with auth_required code when no userId", async () => {
