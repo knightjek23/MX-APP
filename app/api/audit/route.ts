@@ -2,14 +2,15 @@
  * POST /api/audit
  *
  * The whole Legible audit pipeline wrapped in a route handler:
+ *   0. require Clerk auth (defense-in-depth — middleware also gates this)
  *   1. validate request body
- *   2. rate-limit by hashed IP (5/hr)
+ *   2. rate-limit per Clerk user_id (sliding window via Upstash)
  *   3. parse Figma URL
  *   4. fetch file from Figma
  *   5. check frame count (reject if >50 full-file)
  *   6. compact the tree (throws if >120k tokens even after reduction)
  *   7. call Claude via tool-use
- *   8. persist to Supabase
+ *   8. persist to Supabase with user_id attribution
  *   9. return shareable slug
  *
  * Each failure mode has its own typed error class and user-readable
@@ -17,6 +18,7 @@
  */
 
 import { NextRequest, NextResponse } from "next/server";
+import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
 import { parseFigmaUrl, FigmaUrlError } from "@/lib/validation/figma-url";
 import {
@@ -34,7 +36,12 @@ import {
 import { AuditService, AuditPersistError } from "@/lib/services/audit";
 import { compactTree, countFrames, FileTooLargeError } from "@/lib/compact";
 import { getSupabaseClient } from "@/lib/db/supabase";
-import { getAuditRateLimit, hashIp, getClientIp } from "@/lib/rate-limit";
+import {
+  getAuditRateLimit,
+  hashIp,
+  getClientIp,
+  auditRateLimitKey,
+} from "@/lib/rate-limit";
 import { logger } from "@/lib/logger";
 
 const MAX_FRAMES = Number(process.env.AUDIT_MAX_FRAMES) || 50;
@@ -61,6 +68,13 @@ function errorResponse(status: number, message: string, code: string) {
 }
 
 export async function POST(request: NextRequest) {
+  // 0. Require auth. Middleware also blocks unauthenticated requests, but
+  // checking here too means the route is safe even if middleware config drifts.
+  const { userId } = await auth();
+  if (!userId) {
+    return errorResponse(401, "Sign in to run an audit.", "auth_required");
+  }
+
   // 1. Parse body
   let body: unknown;
   try {
@@ -78,13 +92,14 @@ export async function POST(request: NextRequest) {
     );
   }
 
-  // 2. Rate limit by hashed IP
+  // 2. Rate limit per Clerk user. We still hash the IP so the resulting
+  // audit row has a `user_ip_hash` for cross-account abuse detection later.
   const ip = getClientIp(request.headers);
   const ipHash = hashIp(ip);
 
   let rateLimit;
   try {
-    rateLimit = await getAuditRateLimit().limit(ipHash);
+    rateLimit = await getAuditRateLimit().limit(auditRateLimitKey(userId));
   } catch (err) {
     logger.error("audit.route.ratelimit_failure", { error: String(err) });
     return errorResponse(
@@ -187,11 +202,7 @@ export async function POST(request: NextRequest) {
       },
       error: null,
       user_ip_hash: ipHash,
-      // user_id is set in T4 once Clerk auth gates this route. For now,
-      // new audits during the transition still go in as null — same as
-      // pre-auth historical rows. Routing change in T4 swaps this for
-      // the actual Clerk userId.
-      user_id: null,
+      user_id: userId,
     });
 
     // 9. Return slug
