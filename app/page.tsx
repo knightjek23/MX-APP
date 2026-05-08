@@ -1,22 +1,24 @@
 /**
- * Landing page at / — hero, audit form, below-the-fold explainer.
+ * Landing page at / — hero, audit form (or sign-up CTA), explainer.
  * Per PROJECT.md §7.
+ *
+ * Auth gate: signed-in users see the audit form. Signed-out visitors
+ * see a sign-up CTA in the form's place. Gating happens server-side
+ * via Clerk's auth() so there's no client-side flash of "wrong" UI.
  */
 
 import { Suspense } from "react";
+import { auth } from "@clerk/nextjs/server";
 import { AuditForm } from "@/components/audit-form";
+import { SignUpCta } from "@/components/sign-up-cta";
 
-export default function LandingPage() {
+export default async function LandingPage() {
+  const { userId } = await auth();
+  const isSignedIn = !!userId;
+
   return (
     <main className="min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100">
       <div className="max-w-xl mx-auto px-6 py-16 md:py-24">
-        {/* Brand */}
-        <div className="text-center mb-12">
-          <div className="text-sm font-medium tracking-tight text-neutral-900 dark:text-neutral-100">
-            Legible
-          </div>
-        </div>
-
         {/* Hero */}
         <section className="text-center mb-12">
           <h1 className="text-3xl md:text-4xl font-medium leading-tight tracking-tight text-neutral-900 dark:text-neutral-100 mb-4">
@@ -33,16 +35,20 @@ export default function LandingPage() {
           </p>
         </section>
 
-        {/* Form */}
+        {/* Form (signed-in) or sign-up CTA (signed-out) */}
         <section className="mb-6">
-          <Suspense fallback={<div className="h-96" />}>
-            <AuditForm />
-          </Suspense>
+          {isSignedIn ? (
+            <Suspense fallback={<div className="h-96" />}>
+              <AuditForm />
+            </Suspense>
+          ) : (
+            <SignUpCta />
+          )}
         </section>
 
         {/* Pricing hint */}
         <p className="text-center text-xs text-neutral-500 dark:text-neutral-400 mb-16">
-          First 3 audits free. Credit packs start at $5 —{" "}
+          Free during beta — sign up to get started.{" "}
           <a
             href="/pricing"
             className="underline underline-offset-2 hover:text-neutral-700 dark:hover:text-neutral-300"
