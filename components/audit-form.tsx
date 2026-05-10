@@ -63,7 +63,16 @@ export function AuditForm() {
     "block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1.5";
 
   return (
-    <form onSubmit={onSubmit} className="space-y-4">
+    <form
+      onSubmit={onSubmit}
+      className="space-y-4"
+      autoComplete="off"
+      // Hint to password managers (1Password, LastPass, Bitwarden) to skip
+      // this form. Combined with field-level attributes below, this stops
+      // Clerk login credentials from autofilling into the Figma fields.
+      data-1p-ignore="true"
+      data-lpignore="true"
+    >
       <div>
         <label htmlFor="figma_url" className={labelClass}>
           Figma file URL
@@ -77,6 +86,9 @@ export function AuditForm() {
           onChange={(e) => setFigmaUrl(e.target.value)}
           disabled={pending}
           className={inputClass}
+          autoComplete="off"
+          data-1p-ignore="true"
+          data-lpignore="true"
         />
       </div>
 
@@ -101,6 +113,9 @@ export function AuditForm() {
               onChange={(e) => setNodeId(e.target.value)}
               disabled={pending}
               className={inputClass}
+              autoComplete="off"
+              data-1p-ignore="true"
+              data-lpignore="true"
             />
             <p className="text-[11px] text-neutral-500 dark:text-neutral-500 mt-1">
               Right-click a frame in Figma → Copy link. Paste the URL above — the
@@ -131,7 +146,12 @@ export function AuditForm() {
           onChange={(e) => setFigmaPat(e.target.value)}
           disabled={pending}
           className={inputClass}
-          autoComplete="off"
+          // Chrome ignores autoComplete="off" on password fields; using
+          // "new-password" is the documented escape hatch — it tells the
+          // browser this is a fresh secret, not a saved login.
+          autoComplete="new-password"
+          data-1p-ignore="true"
+          data-lpignore="true"
         />
         <p className="text-[11px] text-neutral-500 dark:text-neutral-500 mt-1">
           Your token is used once to fetch the file, then discarded. Never stored.
