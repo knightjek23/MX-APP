@@ -8,6 +8,10 @@
  *
  * Lists up to 50 most recent audits owned by the current user, ordered
  * created_at desc. Empty state for fresh accounts.
+ *
+ * Each row has a kebab (...) menu in the top-right above the score:
+ * Re-run audit · Open in Figma · Copy share link. The left half (frame
+ * name + metadata) is the clickable link target to the audit detail.
  */
 
 import Link from "next/link";
@@ -16,6 +20,7 @@ import { auth } from "@clerk/nextjs/server";
 import { Plus } from "lucide-react";
 import { AuditService, type StoredAudit } from "@/lib/services/audit";
 import { getSupabaseClient } from "@/lib/db/supabase";
+import { AuditRowMenu } from "@/components/audit-row-menu";
 
 export default async function AuditsPage() {
   const { userId } = await auth();
@@ -76,28 +81,42 @@ function AuditRow({ audit }: { audit: StoredAudit }) {
   const score = audit.audit_json.summary.overall_score;
   const scopeLabel = audit.scope === "full-file" ? "Full file" : "Single frame";
   const date = formatDate(audit.created_at);
+  const shareLink = `/audit/${audit.slug}`;
+  const rerunUrl = `/?figma_url=${encodeURIComponent(stripFigmaQueryParams(audit.figma_url))}`;
 
   return (
-    <Link
-      href={`/audit/${audit.slug}`}
-      className="block bg-white dark:bg-neutral-900 border border-neutral-200/70 dark:border-neutral-800 rounded-xl p-4 hover:border-neutral-300 dark:hover:border-neutral-700 transition-colors"
-    >
-      <div className="flex items-start justify-between gap-4 mb-1.5">
-        <h3 className="text-[15px] font-medium text-neutral-900 dark:text-neutral-100 leading-snug">
-          {frameName}
-        </h3>
-        <CompactScore score={score} />
+    <div className="group bg-white dark:bg-neutral-900 border border-neutral-200/70 dark:border-neutral-800 rounded-xl hover:border-neutral-300 dark:hover:border-neutral-700 transition-colors">
+      <div className="p-4 flex items-start justify-between gap-4">
+        {/* Left: clickable link to the audit detail */}
+        <Link
+          href={shareLink}
+          className="flex-1 min-w-0 -m-1 p-1 rounded-md focus:outline-none focus:ring-2 focus:ring-neutral-900 dark:focus:ring-neutral-100"
+        >
+          <h3 className="text-[15px] font-medium text-neutral-900 dark:text-neutral-100 leading-snug mb-1.5">
+            {frameName}
+          </h3>
+          <div className="text-xs text-neutral-500 dark:text-neutral-400 flex items-center gap-2 flex-wrap">
+            <span>{scopeLabel}</span>
+            <span aria-hidden>·</span>
+            <span>{date}</span>
+            <span aria-hidden>·</span>
+            <span className="font-mono text-[11px] text-neutral-400 dark:text-neutral-500">
+              {audit.figma_file_id}
+            </span>
+          </div>
+        </Link>
+        {/* Right: menu above score */}
+        <div className="flex flex-col items-end gap-2 shrink-0">
+          <AuditRowMenu
+            slug={audit.slug}
+            shareLink={shareLink}
+            rerunUrl={rerunUrl}
+            figmaUrl={audit.figma_url}
+          />
+          <CompactScore score={score} />
+        </div>
       </div>
-      <div className="text-xs text-neutral-500 dark:text-neutral-400 flex items-center gap-2 flex-wrap">
-        <span>{scopeLabel}</span>
-        <span aria-hidden>·</span>
-        <span>{date}</span>
-        <span aria-hidden>·</span>
-        <span className="font-mono text-[11px] text-neutral-400 dark:text-neutral-500">
-          {audit.figma_file_id}
-        </span>
-      </div>
-    </Link>
+    </div>
   );
 }
 
@@ -147,5 +166,20 @@ function formatDate(iso: string): string {
     });
   } catch {
     return iso;
+  }
+}
+
+/**
+ * Strip volatile query params from Figma URLs before re-running:
+ * `node-id` (so the user picks scope fresh) and `t` (cache-busting noise).
+ */
+function stripFigmaQueryParams(url: string): string {
+  try {
+    const u = new URL(url);
+    u.searchParams.delete("node-id");
+    u.searchParams.delete("t");
+    return u.toString();
+  } catch {
+    return url;
   }
 }
