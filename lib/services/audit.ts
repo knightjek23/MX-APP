@@ -25,7 +25,14 @@ export interface AuditRecord {
   cost_usd: number;
   audit_json: AuditResult;
   error: string | null;
+  // SHA-256 of the client IP, stored for older anonymous audits. Nullable
+  // for new audits where rate limiting keys on user_id instead. Kept on
+  // the type for backward compatibility with rows persisted before auth.
   user_ip_hash: string | null;
+  // Clerk user identifier (e.g. "user_2abc..."). Null for audits created
+  // before authentication landed. New audits always have a value because
+  // the audit route is gated by auth middleware.
+  user_id: string | null;
 }
 
 export interface StoredAudit extends AuditRecord {
@@ -87,5 +94,72 @@ export class AuditService {
     }
 
     return (data as StoredAudit | null) ?? null;
+  }
+
+  /**
+   * Delete an audit by slug, scoped to a specific user. Filters on BOTH
+   * slug AND user_id so a non-owner can't delete by guessing the URL.
+   *
+   * Returns { deleted: true } when one row matched and was removed,
+   * { deleted: false } when nothing matched (wrong owner, missing slug,
+   * or audit belongs to an anonymous historical record).
+   *
+   * @param slug    The audit's nanoid slug
+   * @param userId  Clerk user identifier of the requester
+   */
+  async deleteBySlug(
+    slug: string,
+    userId: string
+  ): Promise<{ deleted: boolean }> {
+    const { count, error } = await this.db
+      .from("audits")
+      .delete({ count: "exact" })
+      .eq("slug", slug)
+      .eq("user_id", userId);
+
+    if (error) {
+      logger.error("audit.deleteBySlug.failed", {
+        slug,
+        error: error.message,
+      });
+      throw new AuditFetchError(error.message);
+    }
+
+    const deleted = (count ?? 0) > 0;
+    logger.info("audit.deleteBySlug.complete", { slug, deleted });
+    return { deleted };
+  }
+
+  /**
+   * List audits owned by a specific user, ordered most-recent first.
+   *
+   * Used by the /audits dashboard. Filters on the partial index added in
+   * migration 002, so anonymous historical rows (user_id IS NULL) never
+   * appear in any user's list.
+   *
+   * @param userId  Clerk user identifier (e.g. "user_2abc...")
+   * @param opts.limit  Max results to return. Defaults to 50.
+   */
+  async listByUser(
+    userId: string,
+    opts: { limit?: number } = {}
+  ): Promise<StoredAudit[]> {
+    const limit = opts.limit ?? 50;
+    const { data, error } = await this.db
+      .from("audits")
+      .select("*")
+      .eq("user_id", userId)
+      .order("created_at", { ascending: false })
+      .limit(limit);
+
+    if (error) {
+      logger.error("audit.listByUser.failed", {
+        userId,
+        error: error.message,
+      });
+      throw new AuditFetchError(error.message);
+    }
+
+    return (data as StoredAudit[] | null) ?? [];
   }
 }

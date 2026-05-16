@@ -1,11 +1,11 @@
 /**
- * Rate limiting for /api/audit — 5 requests per hour, sliding window,
- * keyed by SHA-256 hash of client IP.
+ * Rate limiting for /api/audit — per-user sliding window via Upstash.
  *
- * Why hash the IP:
- *   - Raw IPs are PII; hashing lets us rate-limit without storing them
- *   - The `user_ip_hash` column in the audits table stores the same hash
- *     so we can trace abuse without exposing the underlying IP
+ * Before auth landed (Week 1): 5 audits/hour per IP, keyed by SHA-256 hash.
+ * After auth (Week 1.5+): 20 audits/hour per Clerk user_id, configurable
+ * via the AUDIT_RATE_LIMIT_PER_HOUR env var. IP-hash helpers stay in this
+ * module for defense-in-depth — the route still records user_ip_hash on
+ * each audit row to support cross-account abuse detection.
  *
  * Why Upstash (not in-memory):
  *   - Vercel serverless functions don't share memory across instances
@@ -17,9 +17,19 @@ import { Redis } from "@upstash/redis";
 import { createHash } from "node:crypto";
 
 const HASH_SALT = "legible-v1:";
+const DEFAULT_RATE_LIMIT_PER_HOUR = 20;
 
 export function hashIp(ip: string): string {
   return createHash("sha256").update(HASH_SALT + ip).digest("hex");
+}
+
+/**
+ * Build the Upstash key for per-user rate limiting. Prefixed with `user:`
+ * so we can tell user-scoped keys apart from any future IP-scoped keys
+ * sharing the same Redis namespace.
+ */
+export function auditRateLimitKey(userId: string): string {
+  return `user:${userId}`;
 }
 
 /**
@@ -40,8 +50,8 @@ export function getClientIp(headers: Headers): string {
 
 /**
  * Lazy-initialized rate limiter. Only opens the Redis connection on
- * first call, which means unit tests can import hashIp/getClientIp
- * without needing UPSTASH_REDIS_* env vars.
+ * first call, which means unit tests can import hashIp/getClientIp/
+ * auditRateLimitKey without needing UPSTASH_REDIS_* env vars.
  */
 let _auditRateLimit: Ratelimit | null = null;
 
@@ -51,13 +61,15 @@ export function getAuditRateLimit(): Ratelimit {
     const token = process.env.UPSTASH_REDIS_REST_TOKEN;
     if (!url || !token) {
       throw new Error(
-        "Missing UPSTASH_REDIS_URL or UPSTASH_REDIS_TOKEN. Rate limiting requires both."
+        "Missing UPSTASH_REDIS_REST_URL or UPSTASH_REDIS_REST_TOKEN. Rate limiting requires both."
       );
     }
+    const perHour = Number(process.env.AUDIT_RATE_LIMIT_PER_HOUR) ||
+      DEFAULT_RATE_LIMIT_PER_HOUR;
     const redis = new Redis({ url, token });
     _auditRateLimit = new Ratelimit({
       redis,
-      limiter: Ratelimit.slidingWindow(5, "1 h"),
+      limiter: Ratelimit.slidingWindow(perHour, "1 h"),
       prefix: "legible:audit",
       analytics: true,
     });

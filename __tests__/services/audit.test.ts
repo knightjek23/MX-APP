@@ -29,7 +29,8 @@ const baseRecord: AuditRecord = {
   cost_usd: 0.027,
   audit_json: sampleAudit,
   error: null,
-  user_ip_hash: "sha256-xyz",
+  user_ip_hash: null,
+  user_id: "user_test_abc",
 };
 
 function mockDb(opts: {
@@ -98,6 +99,54 @@ describe("AuditService", () => {
     expect((capturedInserts[0] as any).run_at_utc).toMatch(
       /^\d{4}-\d{2}-\d{2}T/
     );
+  });
+
+  it("forwards user_id from the record to the insert payload", async () => {
+    const capturedInserts: unknown[] = [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const db: any = {
+      from: () => ({
+        insert: (row: unknown) => {
+          capturedInserts.push(row);
+          return {
+            select: () => ({
+              single: async () => ({
+                data: { id: "uuid", slug: "slug-test" },
+                error: null,
+              }),
+            }),
+          };
+        },
+      }),
+    };
+    const svc = new AuditService(db);
+    await svc.persist({ ...baseRecord, user_id: "user_clerk_xyz" });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((capturedInserts[0] as any).user_id).toBe("user_clerk_xyz");
+  });
+
+  it("forwards user_id = null for legacy/anonymous records", async () => {
+    const capturedInserts: unknown[] = [];
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const db: any = {
+      from: () => ({
+        insert: (row: unknown) => {
+          capturedInserts.push(row);
+          return {
+            select: () => ({
+              single: async () => ({
+                data: { id: "uuid", slug: "slug-test" },
+                error: null,
+              }),
+            }),
+          };
+        },
+      }),
+    };
+    const svc = new AuditService(db);
+    await svc.persist({ ...baseRecord, user_id: null });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    expect((capturedInserts[0] as any).user_id).toBeNull();
   });
 
   it("throws AuditPersistError on a DB insert error", async () => {
