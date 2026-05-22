@@ -48,7 +48,7 @@ export default async function LandingPage() {
 
         {/* Pricing hint */}
         <p className="text-center text-xs text-neutral-500 dark:text-neutral-400 mb-16">
-          Free during beta — sign up to get started.{" "}
+          Free during beta. Sign up to get started.{" "}
           <a
             href="/pricing"
             className="underline underline-offset-2 hover:text-neutral-700 dark:hover:text-neutral-300"
@@ -70,7 +70,7 @@ export default async function LandingPage() {
             from 78% to 28%.
           </p>
           <p>
-            The same signals that help screen readers help agents — plus a few
+            The same signals that help screen readers help agents, plus a few
             agent-specific ones: schema markup, entity naming consistency,
             server-rendered content. Legible audits your design for all of
             them and tells your devs exactly what to change.

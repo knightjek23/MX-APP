@@ -118,8 +118,8 @@ export function AuditForm() {
               data-lpignore="true"
             />
             <p className="text-[11px] text-neutral-500 dark:text-neutral-500 mt-1">
-              Right-click a frame in Figma → Copy link. Paste the URL above — the
-              node ID is parsed automatically.
+              Right-click a frame in Figma → Copy link. Paste the URL above and
+              the node ID is parsed automatically.
             </p>
           </div>
         )}
@@ -180,7 +180,7 @@ export function AuditForm() {
       </button>
 
       <p className="text-center text-[11px] text-neutral-500 dark:text-neutral-500">
-        Typical audit takes 15–45 seconds.
+        Typical audit takes 15 to 45 seconds.
       </p>
     </form>
   );

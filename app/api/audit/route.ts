@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
       {
         error: {
           code: "rate_limited",
-          message: `Rate limit reached — 5 audits per hour. Try again in ${resetMinutes} minute${resetMinutes === 1 ? "" : "s"}.`,
+          message: `Rate limit reached. 20 audits per hour. Try again in ${resetMinutes} minute${resetMinutes === 1 ? "" : "s"}.`,
           retry_after_seconds: resetSeconds,
         },
       },

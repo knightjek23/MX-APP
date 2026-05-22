@@ -34,7 +34,7 @@ const MAX_TOKENS = 8192;
 export class ClaudeNoToolUseError extends Error {
   constructor() {
     super(
-      "The model returned text instead of calling submit_audit. This is rare but can happen under load — try again."
+      "The model returned text instead of calling submit_audit. This is rare but can happen under load. Try again."
     );
     this.name = "ClaudeNoToolUseError";
   }

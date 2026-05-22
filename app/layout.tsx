@@ -18,7 +18,7 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Legible — MX audits for Figma",
+  title: "Legible: MX audits for Figma",
   description:
     "Audit your Figma files for Machine Experience issues so AI agents can read your designs.",
 };

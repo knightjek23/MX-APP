@@ -175,7 +175,7 @@ export function compactTree(raw: FigmaNode): CompactionResult {
   const warnings: string[] = [];
   if (compactedTokens > WARN_TOKEN_THRESHOLD && compactedTokens <= MAX_TOKEN_THRESHOLD) {
     warnings.push(
-      `Compacted tree is ${compactedTokens.toLocaleString()} tokens — approaching the 120k limit.`
+      `Compacted tree is ${compactedTokens.toLocaleString()} tokens. Approaching the 120k limit.`
     );
   }
   if (compactedTokens > MAX_TOKEN_THRESHOLD) {
