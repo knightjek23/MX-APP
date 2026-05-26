@@ -16,8 +16,8 @@ export function SignUpCta() {
         Sign up to run your first audit
       </p>
       <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-6 max-w-sm mx-auto">
-        Free during beta. Email + Google. Audits save to your account so
-        you can revisit and share them.
+        Free during beta. Sign in with email or Google. Audits stay on your
+        account so you can revisit and share them.
       </p>
       <div className="flex items-center justify-center gap-4">
         <Link

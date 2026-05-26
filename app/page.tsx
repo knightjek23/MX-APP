@@ -48,7 +48,7 @@ export default async function LandingPage() {
 
         {/* Pricing hint */}
         <p className="text-center text-xs text-neutral-500 dark:text-neutral-400 mb-16">
-          Free during beta. Sign up to get started.{" "}
+          Free during beta. Sign up to start.{" "}
           <a
             href="/pricing"
             className="underline underline-offset-2 hover:text-neutral-700 dark:hover:text-neutral-300"

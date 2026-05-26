@@ -137,7 +137,7 @@ export function AnnotationCard({
 
         {designCopyMissing && (
           <p className="mt-3 text-[11px] text-neutral-500 dark:text-neutral-500 italic">
-            Showing engineer view. This audit was generated before the design view existed. Re-run to see designer-facing copy.
+            Engineer view only. This audit predates the design view. Re-run to see designer-facing copy.
           </p>
         )}
       </div>

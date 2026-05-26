@@ -11,11 +11,10 @@ export default function PricingPage() {
       <div className="max-w-xl mx-auto px-6 py-24 text-center">
         <h1 className="text-3xl font-medium mb-4 tracking-tight">Pricing</h1>
         <p className="text-base text-neutral-600 dark:text-neutral-400 mb-2">
-          Beta is free for the first 3 audits.
+          Your first 3 audits are free during beta.
         </p>
         <p className="text-sm text-neutral-500 dark:text-neutral-500 mb-12">
-          Credit packs coming soon. We&apos;re collecting feedback to set fair
-          per-audit pricing.
+          Credit packs coming soon. Per-audit pricing lands after beta feedback.
         </p>
         <Link
           href="/"

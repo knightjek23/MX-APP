@@ -56,7 +56,7 @@ class OversizedFileError extends Error {
   readonly frameCount: number;
   constructor(frameCount: number) {
     super(
-      `This file has ${frameCount} frames. We can audit up to ${MAX_FRAMES} per run. Scope to a specific frame (right-click a frame in Figma → Copy link) or split the file into pages.`
+      `This file has ${frameCount} frames. The audit supports up to ${MAX_FRAMES} per run. Scope to a specific frame (right-click a frame in Figma → Copy link), or split the file into pages.`
     );
     this.name = "OversizedFileError";
     this.frameCount = frameCount;
@@ -104,7 +104,7 @@ export async function POST(request: NextRequest) {
     logger.error("audit.route.ratelimit_failure", { error: String(err) });
     return errorResponse(
       503,
-      "Rate limiter is unavailable. Try again in a moment.",
+      "Couldn't check the rate limit on our end. Try again in a moment.",
       "ratelimit_unavailable"
     );
   }
@@ -119,7 +119,7 @@ export async function POST(request: NextRequest) {
       {
         error: {
           code: "rate_limited",
-          message: `Rate limit reached. 20 audits per hour. Try again in ${resetMinutes} minute${resetMinutes === 1 ? "" : "s"}.`,
+          message: `Hit the 20-per-hour audit limit. Try again in ${resetMinutes} minute${resetMinutes === 1 ? "" : "s"}.`,
           retry_after_seconds: resetSeconds,
         },
       },
@@ -226,7 +226,7 @@ function handleError(err: unknown): NextResponse {
     logger.error("audit.route.figma_api_error", { status: err.status });
     return errorResponse(
       502,
-      "Figma's API returned an error. Try again in a moment.",
+      "Figma's API hit an error. Try again in a moment.",
       "figma_api_error"
     );
   }
@@ -243,13 +243,18 @@ function handleError(err: unknown): NextResponse {
     return errorResponse(502, err.message, "claude_no_tool_use");
   }
   if (err instanceof ClaudeValidationError) {
-    return errorResponse(502, err.message, "claude_validation_error");
+    logger.error("audit.route.claude_validation_error", { message: err.message });
+    return errorResponse(
+      502,
+      "The audit didn't come back in the right shape. Try again in a moment.",
+      "claude_validation_error"
+    );
   }
   if (err instanceof AuditPersistError) {
     logger.error("audit.route.persist_error", { message: err.message });
     return errorResponse(
       500,
-      "Failed to save audit results. Try again.",
+      "Couldn't save the audit on our end. Try again.",
       "persist_error"
     );
   }

@@ -43,7 +43,7 @@ export default async function AuditsPage() {
             <p className="text-sm text-neutral-500 dark:text-neutral-400 mt-1">
               {audits.length === 0
                 ? "Nothing here yet."
-                : `${audits.length} ${audits.length === 1 ? "audit" : "audits"}, most recent first.`}
+                : `${audits.length} ${audits.length === 1 ? "audit" : "audits"}. Most recent first.`}
             </p>
           </div>
           {audits.length > 0 && (
@@ -144,8 +144,8 @@ function EmptyState() {
         No audits yet
       </p>
       <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-6 max-w-xs mx-auto leading-relaxed">
-        Paste a Figma file URL on the home page and run your first MX audit. It
-        will appear here, with a shareable link you can send to your team.
+        Paste a Figma file URL on the home page to run your first MX audit.
+        It'll show up here, with a shareable link for your team.
       </p>
       <Link
         href="/"

@@ -44,7 +44,7 @@ export function EntityConflictsCard({ scope, conflictCount, figmaUrl }: Props) {
         </span>
       </div>
       <div className="text-xs text-neutral-600 dark:text-neutral-400 mt-1 leading-snug">
-        Audit a full file to detect inconsistent naming across frames.{" "}
+        Run a full-file audit to catch naming inconsistencies across frames.{" "}
         <span className="text-neutral-900 dark:text-neutral-200 underline underline-offset-2 group-hover:no-underline">
           Re-run full file →
         </span>

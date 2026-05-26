@@ -17,18 +17,20 @@ const FIGMA_API_BASE = "https://api.figma.com";
 export class InvalidTokenError extends Error {
   constructor() {
     super(
-      "Figma token is invalid or expired. Generate a new Personal Access Token in Figma (Settings → Security → Personal access tokens) and try again."
+      "Your Figma token is invalid or expired. Generate a new one in Figma (Settings → Security → Personal access tokens) and try again."
     );
     this.name = "InvalidTokenError";
   }
 }
 
 export class FileNotFoundError extends Error {
+  readonly identifier: string;
   constructor(identifier: string) {
     super(
-      `Figma file or node ${identifier} was not found, or your token doesn't have access to it.`
+      `Couldn't find that Figma file or frame, or your token doesn't have access to it. Check the URL.`
     );
     this.name = "FileNotFoundError";
+    this.identifier = identifier;
   }
 }
 

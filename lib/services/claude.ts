@@ -34,7 +34,7 @@ const MAX_TOKENS = 8192;
 export class ClaudeNoToolUseError extends Error {
   constructor() {
     super(
-      "The model returned text instead of calling submit_audit. This is rare but can happen under load. Try again."
+      "Couldn't generate the audit on our end. This is rare. Try again in a moment."
     );
     this.name = "ClaudeNoToolUseError";
   }
@@ -42,7 +42,7 @@ export class ClaudeNoToolUseError extends Error {
 
 export class ClaudeRateLimitError extends Error {
   constructor() {
-    super("Anthropic is rate-limited or overloaded. Wait a moment and try again.");
+    super("The audit service is overloaded right now. Wait a moment and try again.");
     this.name = "ClaudeRateLimitError";
   }
 }

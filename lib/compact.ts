@@ -13,7 +13,7 @@ export class FileTooLargeError extends Error {
   readonly tokens: number;
   constructor(tokens: number) {
     super(
-      `This file is too dense to audit in a single run (${tokens.toLocaleString()} tokens, max 120,000). Scope to a specific frame or split the file into pages.`
+      "This file is too dense to audit in a single run. Scope to a specific frame, or split the file into pages."
     );
     this.name = "FileTooLargeError";
     this.tokens = tokens;
