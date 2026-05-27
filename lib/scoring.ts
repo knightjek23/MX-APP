@@ -1,5 +1,5 @@
 /**
- * Compute the MX score from annotation counts.
+ * Compute the AX score from annotation counts.
  *
  * Formula (per PROJECT.md §4):
  *   score = max(0, 100 - ceil(log2(p1 + 1) * 12) - (p2 * 3) - (p3 * 1))

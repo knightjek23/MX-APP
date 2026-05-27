@@ -61,8 +61,8 @@ write_if_missing "lib/scoring.ts" "// TODO (Prompt 2): Log-curve score formula p
 export {};"
 
 # ---- lib/prompts ----
-write_if_missing "lib/prompts/mx-auditor.ts" "// TODO (Prompt 2): Export v1 system prompt from PROJECT.md §2 as MX_AUDITOR_PROMPT const.
-export const MX_AUDITOR_PROMPT = \`\`;"
+write_if_missing "lib/prompts/ax-auditor.ts" "// TODO (Prompt 2): Export v1 system prompt from PROJECT.md §2 as AX_AUDITOR_PROMPT const.
+export const AX_AUDITOR_PROMPT = \`\`;"
 
 # ---- lib/types ----
 write_if_missing "lib/types/audit.ts" "// TODO (Prompt 2): Zod schemas from PROJECT.md §4.

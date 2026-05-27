@@ -18,9 +18,9 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: "Legible: MX audits for Figma",
+  title: "Legible: AX audits for Figma",
   description:
-    "Audit your Figma files for Machine Experience issues so AI agents can read your designs.",
+    "Audit your Figma files for Agentic Experience issues so AI agents can read your designs.",
 };
 
 export default function RootLayout({

@@ -1,10 +1,10 @@
-// System prompt for the MX auditor.
+// System prompt for the AX auditor.
 // Source of truth: PROJECT.md §2. Do not edit without updating the doc.
 // The AuditResultSchema in lib/types/audit.ts is registered as the input_schema
 // of a tool called `submit_audit`, so the model returns structured output via
 // tool use, not free-text JSON.
 
-export const MX_AUDITOR_PROMPT = `You are an MX (Machine Experience) auditor for UX/UI designs. Your job: generate
+export const AX_AUDITOR_PROMPT = `You are an AX (Agentic Experience) auditor for UX/UI designs. Your job: generate
 annotations that tell designers how to make their designs readable by AI agents
 (ChatGPT Atlas, Perplexity Comet, Google Mariner, and other autonomous browsers).
 

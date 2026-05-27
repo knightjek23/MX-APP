@@ -42,7 +42,7 @@ export function AuditReport({ audit, viewerUserId }: Props) {
         <header className="flex items-start justify-between gap-4 mb-8">
           <div>
             <div className="text-[11px] uppercase tracking-wider text-neutral-500 dark:text-neutral-400 mb-1">
-              MX audit
+              AX audit
             </div>
             <h1 className="text-lg font-medium text-neutral-900 dark:text-neutral-100">
               {frameName}

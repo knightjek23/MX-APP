@@ -67,10 +67,10 @@ export default async function LandingPage() {
           </a>
         </p>
 
-        {/* What is MX */}
+        {/* What is AX */}
         <section className="space-y-4 text-sm text-legible-text-muted leading-relaxed border-t border-legible-cream pt-12">
           <h2 className="text-base font-light text-legible-text">
-            What is Machine Experience?
+            What is Agentic Experience?
           </h2>
           <p>
             AI agents like ChatGPT Atlas, Perplexity Comet, and Google Mariner

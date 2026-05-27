@@ -123,7 +123,7 @@ Header lives in `app/layout.tsx` so it appears on every page.
 - Hero copy unchanged.
 - Pricing line changes: ~~"First 3 audits free"~~ → "Free during beta — sign up to get started."
 - Form: signed-in users see the existing form. Signed-out users see a centered CTA: "Sign up to run your first audit" + Sign Up button.
-- "What is Machine Experience?" explainer block stays.
+- "What is Agentic Experience?" explainer block stays.
 
 ### 6.3 Audit form (`components/audit-form.tsx`)
 

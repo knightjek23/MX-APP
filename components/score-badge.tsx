@@ -1,5 +1,5 @@
 /**
- * ScoreBadge — color-coded MX score display.
+ * ScoreBadge — color-coded AX score display.
  * Tiers per PROJECT.md §7: 90+ success, 70+ warning, <70 danger.
  */
 
@@ -20,7 +20,7 @@ export function ScoreBadge({ score }: Props) {
   return (
     <div className="flex flex-col items-end">
       <span className="text-[11px] uppercase tracking-wider text-neutral-500 dark:text-neutral-400">
-        MX score
+        AX score
       </span>
       <span className={`text-3xl font-medium leading-none mt-1 ${colorClass}`}>
         {score}

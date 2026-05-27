@@ -1,6 +1,6 @@
 # Legible
 
-> AI-powered MX (Machine Experience) annotation tool for Figma. Audits design files and generates machine-readability notes so designs render cleanly for the 51% of web traffic that is now non-human (ChatGPT Atlas, Perplexity Comet, Google Mariner, and other autonomous agents).
+> AI-powered AX (Agentic Experience) annotation tool for Figma. Audits design files and generates machine-readability notes so designs render cleanly for the 51% of web traffic that is now non-human (ChatGPT Atlas, Perplexity Comet, Google Mariner, and other autonomous agents).
 
 This document is a self-contained handoff from ideation → build. It is the single source of truth for the project. Any fresh Claude Code session should read this file first before making decisions.
 
@@ -26,15 +26,15 @@ This document is a self-contained handoff from ideation → build. It is the sin
 
 ### The one-liner
 
-An AI co-pilot that lives inside your Figma workflow and auto-generates MX annotations on components, frames, and design system tokens. Designers ship files with notes that tell developers how to make the resulting product readable by AI agents, not just humans.
+An AI co-pilot that lives inside your Figma workflow and auto-generates AX annotations on components, frames, and design system tokens. Designers ship files with notes that tell developers how to make the resulting product readable by AI agents, not just humans.
 
 ### Why now
 
 - **Automated traffic surpassed human traffic in 2024** — 51% of web interactions are non-human. This is already the case, not a future trend.
 - **Agent browsers are shipping** — ChatGPT Atlas, Perplexity Comet, and Google Project Mariner browse sites autonomously today. They parse the accessibility tree, the DOM, and in some cases pixel vision.
 - **The gap is real** — A UC Berkeley / University of Michigan CHI 2026 study found agent task success drops from 78% to 28% when the accessibility tree is impoverished. Most product sites are in that impoverished range.
-- **Designers don't know MX exists yet** — 93% of designers use generative AI tools (NN Group), but 54% of their clients want AI without clear use cases. MX annotation is the concrete use case.
-- **Same plumbing, different buyer** — The a11y annotation plugin market exists (eBay Include, BrowserStack, Indeed, GitHub) but is framed as WCAG compliance. Compliance is a checkbox that gets deferred. MX is framed as conversion and revenue — AI-sourced visitors convert at ~27% vs 2.1% from traditional search. Same technical output, 10x the urgency.
+- **Designers don't know AX exists yet** — 93% of designers use generative AI tools (NN Group), but 54% of their clients want AI without clear use cases. AX annotation is the concrete use case.
+- **Same plumbing, different buyer** — The a11y annotation plugin market exists (eBay Include, BrowserStack, Indeed, GitHub) but is framed as WCAG compliance. Compliance is a checkbox that gets deferred. AX is framed as conversion and revenue — AI-sourced visitors convert at ~27% vs 2.1% from traditional search. Same technical output, 10x the urgency.
 
 ### The wedge vs. existing a11y plugins
 
@@ -45,9 +45,9 @@ Two pieces of scope no a11y plugin covers:
 
 ### Target user
 
-Primary: solo designers and small product teams shipping B2B SaaS. They already care about Dev Mode handoff quality. MX annotations are a natural extension of "what else does the dev need to know."
+Primary: solo designers and small product teams shipping B2B SaaS. They already care about Dev Mode handoff quality. AX annotations are a natural extension of "what else does the dev need to know."
 
-Secondary: design system leads at mid-size companies building internal libraries. One-time audit of the library prevents thousands of downstream MX issues.
+Secondary: design system leads at mid-size companies building internal libraries. One-time audit of the library prevents thousands of downstream AX issues.
 
 ### Positioning
 
@@ -74,7 +74,7 @@ The v0 prompt was validated against a real SoloDesk dashboard frame and passed t
 ### The prompt
 
 ```
-You are an MX (Machine Experience) auditor for UX/UI designs. Your job: generate
+You are an AX (Agentic Experience) auditor for UX/UI designs. Your job: generate
 annotations that tell designers how to make their designs readable by AI agents
 (ChatGPT Atlas, Perplexity Comet, Google Mariner, and other autonomous browsers).
 
@@ -252,14 +252,14 @@ The Figma API returns verbose trees. Before sending to Claude, strip non-semanti
 // Conceptual — see lib/services/claude.ts for real code
 const AUDIT_TOOL = {
   name: "submit_audit",
-  description: "Submit the MX audit for this Figma design.",
+  description: "Submit the AX audit for this Figma design.",
   input_schema: zodToJsonSchema(AuditResultSchema),
 };
 
 const response = await anthropic.messages.create({
   model: "claude-sonnet-4-5",
   max_tokens: 8192,
-  system: MX_AUDITOR_PROMPT,
+  system: AX_AUDITOR_PROMPT,
   tools: [AUDIT_TOOL],
   tool_choice: { type: "tool", name: "submit_audit" },
   messages: [{
@@ -431,21 +431,49 @@ The server recomputes the score from counts rather than trusting what the LLM re
 - CI/CD: GitHub → Vercel previews on PR, main → production
 - Observability: every audit run logged to Supabase with tokens, latency, cost, error, compacted size
 
-### 5.2 Week 1.5 — OAuth replacement
+### 5.2 Week 1.5 — Accounts (shipped 2026-05)
 
-Ship **within 7 days of Week 1 launch.** The PAT form is replaced by a "Connect Figma" OAuth button. Flow:
+Clerk authentication landed earlier than originally planned (was Month 1)
+because the Week 1 deploy validated real usage and saving audits became
+the obvious next ask. What shipped:
 
-1. User clicks "Connect Figma" → redirect to Figma OAuth consent (scope: `file_read`)
-2. Callback at `/auth/figma/callback` exchanges code for access token
-3. Token stored in an httpOnly, short-lived session cookie (no DB persistence)
-4. User lands on an authenticated form: just paste Figma URL, no PAT field
+- **Clerk integration** — `@clerk/nextjs` v7, email + password and Google
+  OAuth as sign-in methods. `<ClerkProvider>` wraps the app; `clerkMiddleware`
+  gates `/audits` and `/api/audit` while keeping `/`, `/audit/[slug]`,
+  `/api/health`, `/pricing`, and `/sign-in|up` public.
+- **Sign-in / sign-up pages** at `/sign-in` and `/sign-up` using Clerk's
+  `<SignIn />` / `<SignUp />` components on Legible-branded layouts.
+- **Persistent header nav** on every page — brand wordmark on the left,
+  "My audits" + `<UserButton />` on the right when signed in, "Sign in"
+  + "Sign up" CTAs when signed out.
+- **Hard sign-in gate** on audit creation. Signed-out visitors see a
+  centered "Sign up to run your first audit" CTA where the form would be.
+- **`user_id` column on audits** (migration 002, partial index on non-null
+  values). New audits attribute to the Clerk user. Pre-auth historical
+  rows have `user_id = NULL` and stay accessible by slug but never appear
+  in any user's dashboard.
+- **Per-user rate limiting** — 20 audits/hour per Clerk user_id, replacing
+  the previous 5/hour per-IP limit. Configurable via
+  `AUDIT_RATE_LIMIT_PER_HOUR`.
+- **`/audits` dashboard** listing the user's own past audits (max 50,
+  most recent first). Each row has a kebab menu: re-run audit, open in
+  Figma, copy share link, delete audit (with confirmation modal).
+- **"Yours" indicator** on `/audit/[slug]` when the audit's creator views
+  their own report, plus a "Re-run this file" footer action.
 
-PAT remains supported as a fallback for the first few weeks (Figma OAuth requires app approval; if that hits delays, PAT keeps the funnel alive).
+Still queued for Month 1:
+
+- **Figma OAuth** replacing the PAT field on the audit form. PAT remains
+  the only path for now. Originally planned for Week 1.5 but bumped to
+  ship Clerk first; revisit once billing requires polished cold-traffic UX.
+- **Stripe billing** — credit-pack purchases.
+- **Sentry** — error reporting.
 
 ### 5.3 Out of scope (move to Month 1 or later)
 
-- Clerk auth (Month 1 — when billing lands)
+- ~~Clerk auth~~ — **shipped Week 1.5** (see §5.2)
 - Stripe billing (Month 1 — credit pack purchases: $5 for 5 audits, $20 for 25 audits, $60 for 100 audits — lock pricing after 20-designer validation)
+- Figma OAuth replacing PAT (Month 1 — see §5.2)
 - Figma plugin (Month 2 — web app validates first)
 - Code export (Month 2 — `.tsx`/`.html` generation with semantic HTML + JSON-LD)
 - Per-frame thumbnails (nice-to-have Week 2)
@@ -490,7 +518,7 @@ Josh's standing rules, mapped to Legible. Non-negotiable for Week 1.
 | Secrets in env vars; separate dev/prod | Separate Supabase projects. Separate Anthropic keys with separate spend alerts ($50/mo dev, $200/mo prod). |
 | Observability from day one | Every audit run → Supabase row with tokens (raw + compacted), latency, cost, error. `/api/health` endpoint with build SHA. Sentry deferred to Month 1. |
 | External APIs wrapped in service layer | `FigmaService`, `ClaudeService`, `AuditService`. Pure `compactTree` function. Zero direct `fetch()` in route handlers. |
-| Rate limiting on auth and write endpoints | Upstash Redis on `POST /api/audit`. 5/hr anonymous Week 1, keyed by hashed IP. |
+| Rate limiting on auth and write endpoints | Upstash Redis on `POST /api/audit`. Was 5/hr per hashed IP in Week 1; switched to 20/hr per Clerk `user_id` once accounts landed (Week 1.5). Tunable via `AUDIT_RATE_LIMIT_PER_HOUR`. |
 | Server-side input validation | Zod on URL shape (regex: `figma.com/(file|design)/...`), PAT format, node ID format. Reject malformed early. |
 | Plan architecture early; proper DB migrations | Supabase migrations in `/supabase/migrations/`. Version-controlled from first commit. |
 | Real staging mirroring production | Vercel previews on every PR. Preview deploys connect to a `staging` Supabase branch. |
@@ -539,7 +567,7 @@ Single-purpose. One hero, one form, one example output below the fold.
 
 **Below the fold:**
 - One real audit output from the SoloDesk run — proof of concept (embed the JSON sample from Section 10)
-- "What is MX?" short explainer (3-4 paragraphs max)
+- "What is AX?" short explainer (3-4 paragraphs max)
 - Footer: Anthropic-powered, no affiliation
 
 ### Report page (`/audit/[slug]`)
@@ -547,8 +575,8 @@ Single-purpose. One hero, one form, one example output below the fold.
 The mockup rendered in the conversation is the target. Components, top-down:
 
 **Header row**
-- Left: "MX audit" eyebrow, frame name (h1, 18px/500), meta line (Frame ID · Run date · Model · Scope: Full file / Single frame)
-- Right: MX score (30px/500) out of 100, color-coded
+- Left: "AX audit" eyebrow, frame name (h1, 18px/500), meta line (Frame ID · Run date · Model · Scope: Full file / Single frame)
+- Right: AX score (30px/500) out of 100, color-coded
   - 90–100: text-success
   - 70–89: text-warning
   - 0–69: text-danger
@@ -643,7 +671,7 @@ legible/
 │   ├── compact.ts                # pure function: raw FigmaTree → CompactFigmaTree
 │   ├── scoring.ts                # computeScore(p1, p2, p3)
 │   ├── prompts/
-│   │   └── mx-auditor.ts         # the system prompt as a typed string
+│   │   └── ax-auditor.ts         # the system prompt as a typed string
 │   ├── types/
 │   │   ├── audit.ts              # zod schemas from section 4
 │   │   └── figma.ts              # Figma API types
@@ -709,7 +737,7 @@ Read PROJECT.md sections 2, 4, and 7.
 Implement:
 1. `lib/types/audit.ts` — all Zod schemas from section 4, exported with TypeScript types
 2. `lib/types/figma.ts` — minimal Figma API types we need (File, Node, Document). Source from https://www.figma.com/developers/api
-3. `lib/prompts/mx-auditor.ts` — export the v1 system prompt from section 2 as a const.
+3. `lib/prompts/ax-auditor.ts` — export the v1 system prompt from section 2 as a const.
 4. `lib/scoring.ts` — computeScore(p1, p2, p3) using the log-curve formula from section 4.
 5. `lib/validation/figma-url.ts` — parse a Figma URL into { fileId, nodeId? }. Handle both /file/ and /design/ formats. Throw on malformed input with a user-readable error.
 6. `__tests__/scoring.test.ts` — verify scores at key counts: (0,0,0)=100, (1,0,0)=88, (6,4,3)=~66, (40,0,0)>0, (100,0,0)>0.
@@ -878,20 +906,28 @@ Summary: 6 P1 / 4 P2 / 3 P3. Under the v2 log-curve formula, that's `100 - ceil(
 - ~~Pricing model~~ — locked: **per-audit credits**, first 3 free, packs start at $5
 - ~~Figma plugin UX (first surface)~~ — resolved: web app Week 1 → Figma OAuth Week 1.5 → native plugin Month 2
 
+### Resolved in v3 (Week 1.5)
+
+- ~~Clerk auth (Month 1)~~ — **shipped Week 1.5.** Hard sign-in gate on audit creation, public-by-slug viewing preserved.
+- ~~User dashboard~~ — `/audits` shipped with kebab menu (re-run, open in Figma, copy share link, delete + confirm).
+- ~~Rate limit model~~ — switched from per-IP to per-user once every audit creator is authenticated.
+- ~~Existing audit attribution~~ — pre-auth audits stay with `user_id = NULL`, accessible by slug, never in any dashboard. Owners who want them in their dashboard can re-run the file under their account.
+
 ### Open questions (decide before Month 1)
 
 - **Credit pack pricing** — $5/5, $20/25, $60/100 is a placeholder. Validate after the 20-designer beta. What does "I'd pay for this" look like in real numbers?
 - **Team features scope** — shared audit history, team billing, SSO. Month 3 cut line.
 - **Figma plugin UX (Month 2)** — annotations as native Figma comments, dedicated annotation nodes, or Dev Mode extension panel?
+- **Figma OAuth UX (Month 1)** — originally Week 1.5, bumped to ship Clerk first. Worth landing before broad-traffic outreach since PAT generation is a friction wall for cold designers.
 
 ---
 
 ## 12. Quick Reference (Duplicate of Section 0)
 
 **Name:** Legible · `legible.design`
-**Stack:** Next.js 15, Supabase, Clerk (M1), Stripe (M1), Vercel, Upstash, Anthropic Sonnet 4.5 (tool-use)
-**Week 1 deliverable:** paste Figma URL → get shareable audit report
-**Week 1.5 deliverable:** Figma OAuth replaces PAT
+**Stack:** Next.js 15, Supabase, Clerk (Week 1.5), Stripe (M1), Vercel, Upstash, Anthropic Sonnet 4.5 (tool-use)
+**Week 1 deliverable:** ✅ paste Figma URL → get shareable audit report
+**Week 1.5 deliverable:** ✅ Clerk accounts + `/audits` dashboard. Figma OAuth bumped to M1.
 **Success gate:** 5 designers say "this is useful", 1 asks "how much?"
 **Build start prompt:** "Read PROJECT.md. Run prompt 1 from section 9."
 

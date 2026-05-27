@@ -1,5 +1,5 @@
 /**
- * ClaudeService — wraps Anthropic Sonnet 4.5 with the MX auditor prompt
+ * ClaudeService — wraps Anthropic Sonnet 4.5 with the AX auditor prompt
  * and a structured-output tool use pattern.
  *
  * The AuditResultSchema (lib/types/audit.ts) is registered as the
@@ -21,7 +21,7 @@ import Anthropic from "@anthropic-ai/sdk";
 import { z } from "zod";
 import { AuditResultSchema, type AuditResult } from "@/lib/types/audit";
 import type { CompactFigmaTree } from "@/lib/types/figma";
-import { MX_AUDITOR_PROMPT } from "@/lib/prompts/mx-auditor";
+import { AX_AUDITOR_PROMPT } from "@/lib/prompts/ax-auditor";
 import { computeScore } from "@/lib/scoring";
 import { logger } from "@/lib/logger";
 
@@ -91,7 +91,7 @@ export class ClaudeService {
 
     const auditTool = {
       name: "submit_audit",
-      description: "Submit the MX audit for this Figma design.",
+      description: "Submit the AX audit for this Figma design.",
       input_schema: jsonSchema,
     };
 
@@ -106,7 +106,7 @@ export class ClaudeService {
       response = await this.client.messages.create({
         model: MODEL,
         max_tokens: MAX_TOKENS,
-        system: MX_AUDITOR_PROMPT,
+        system: AX_AUDITOR_PROMPT,
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         tools: [auditTool as any],
         tool_choice: { type: "tool", name: "submit_audit" },

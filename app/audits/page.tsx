@@ -144,7 +144,7 @@ function EmptyState() {
         No audits yet
       </p>
       <p className="text-sm text-neutral-600 dark:text-neutral-400 mb-6 max-w-xs mx-auto leading-relaxed">
-        Paste a Figma file URL on the home page to run your first MX audit.
+        Paste a Figma file URL on the home page to run your first AX audit.
         It'll show up here, with a shareable link for your team.
       </p>
       <Link

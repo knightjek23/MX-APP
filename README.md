@@ -1,6 +1,6 @@
 # Legible
 
-AI-powered MX (Machine Experience) annotation tool for Figma. Audits design files and generates machine-readability notes for the 51% of web traffic that is now non-human.
+AI-powered AX (Agentic Experience) annotation tool for Figma. Audits design files and generates machine-readability notes for the 51% of web traffic that is now non-human.
 
 Single source of truth for this project is `PROJECT.md` — read it before making changes.
 

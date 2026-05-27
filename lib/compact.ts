@@ -2,7 +2,7 @@
  * Figma tree compaction.
  *
  * Takes a raw Figma REST API response tree and reduces it to the semantic
- * fields Legible's MX auditor actually needs. Target: 70% token reduction.
+ * fields Legible's AX auditor actually needs. Target: 70% token reduction.
  *
  * See PROJECT.md §3.1 for the full keep / strip rule list.
  */
