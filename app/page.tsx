@@ -42,25 +42,18 @@ export default async function LandingPage() {
           </p>
         </section>
 
-        {/* Form (signed-in) or sign-up CTA (signed-out), wrapped in two-layer
-            glassmorph card per Figma node 16:5966.
-            - Outer wrapper: sand stroke, translucent gradient, 20px backdrop
-              blur, soft drop shadow, noise overlay. Visually the "glass ring."
-            - Inner card: opaque surface, cream border, drop shadow, contains
-              the form content so text reads cleanly without bg interference. */}
+        {/* Form (signed-in) or sign-up CTA (signed-out), wrapped in glassmorph card */}
         <section className="mb-6">
-          <div className="relative rounded-[40px] border-[3px] border-legible-sand bg-gradient-to-br from-white/[0.24] to-white/[0.06] backdrop-blur-[20px] shadow-[0_0_50px_-25px_rgba(0,0,0,0.4)] p-3 md:p-4 dark:from-white/[0.06] dark:to-white/[0.02] dark:shadow-[0_0_50px_-25px_rgba(0,0,0,0.7)] overflow-hidden">
-            <div className="absolute inset-0 legible-noise opacity-[0.08] mix-blend-overlay pointer-events-none" />
-            <div className="relative bg-white dark:bg-legible-surface border border-legible-cream rounded-2xl shadow-[0_0_50px_0_rgba(0,0,0,0.12)] dark:shadow-[0_0_50px_0_rgba(0,0,0,0.5)]">
-              <div className="p-8 md:p-10">
-                {isSignedIn ? (
-                  <Suspense fallback={<div className="h-96" />}>
-                    <AuditForm />
-                  </Suspense>
-                ) : (
-                  <SignUpCta />
-                )}
-              </div>
+          <div className="relative bg-white/95 dark:bg-legible-surface backdrop-blur-[20px] border border-legible-cream rounded-2xl shadow-[0_0_50px_0_rgba(125,48,24,0.12)] dark:shadow-[0_0_50px_0_rgba(0,0,0,0.5)] overflow-hidden">
+            <div className="absolute inset-0 legible-noise opacity-[0.05] mix-blend-overlay pointer-events-none" />
+            <div className="relative p-8 md:p-10">
+              {isSignedIn ? (
+                <Suspense fallback={<div className="h-96" />}>
+                  <AuditForm />
+                </Suspense>
+              ) : (
+                <SignUpCta />
+              )}
             </div>
           </div>
         </section>
