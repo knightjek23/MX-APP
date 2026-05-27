@@ -17,14 +17,7 @@ export default async function LandingPage() {
   const isSignedIn = !!userId;
 
   return (
-    <main className="relative min-h-screen bg-legible-bg text-legible-text">
-      {/* Decorative organic shapes — viewport-fixed so they stay put as the
-          page scrolls. Hidden in dark mode. -z-10 keeps the layer behind
-          content while sitting above main's bg color. */}
-      <div
-        aria-hidden="true"
-        className="fixed inset-0 -z-10 bg-[url('/landing-bg.png')] bg-cover bg-no-repeat bg-center pointer-events-none dark:hidden"
-      />
+    <main className="relative min-h-screen text-legible-text bg-legible-bg bg-[url('/landing-bg.png')] bg-cover bg-no-repeat bg-center bg-fixed dark:bg-none">
       <div className="relative max-w-xl mx-auto px-6 py-16 md:py-24">
         {/* Hero */}
         <section className="text-center mb-12">
