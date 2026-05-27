@@ -17,49 +17,54 @@ export default async function LandingPage() {
   const isSignedIn = !!userId;
 
   return (
-    <main className="min-h-screen bg-neutral-50 dark:bg-neutral-950 text-neutral-900 dark:text-neutral-100">
+    <main className="min-h-screen bg-legible-bg text-legible-text">
       <div className="max-w-xl mx-auto px-6 py-16 md:py-24">
         {/* Hero */}
         <section className="text-center mb-12">
-          <h1 className="text-3xl md:text-4xl font-medium leading-tight tracking-tight text-neutral-900 dark:text-neutral-100 mb-4">
+          <h1 className="font-extralight text-[28px] md:text-[35px] leading-[1.345] tracking-tight text-legible-text mb-4">
             Your designs are invisible to the AI agents buying on behalf of your
             users.
           </h1>
-          <p className="text-base text-neutral-600 dark:text-neutral-400 leading-relaxed mb-4 max-w-lg mx-auto">
+          <p className="font-light text-base text-legible-text-muted leading-[1.65] mb-4 max-w-lg mx-auto">
             Legible audits your Figma file and tells you what to fix before you
             ship.
           </p>
-          <p className="text-xs text-neutral-500 dark:text-neutral-500 italic">
+          <p className="text-xs text-legible-text-faded italic">
             51% of web traffic is non-human. Most sites are built for the other
             49%.
           </p>
         </section>
 
-        {/* Form (signed-in) or sign-up CTA (signed-out) */}
+        {/* Form (signed-in) or sign-up CTA (signed-out), wrapped in glassmorph card */}
         <section className="mb-6">
-          {isSignedIn ? (
-            <Suspense fallback={<div className="h-96" />}>
-              <AuditForm />
-            </Suspense>
-          ) : (
-            <SignUpCta />
-          )}
+          <div className="relative bg-white/95 dark:bg-legible-surface backdrop-blur-sm border border-legible-cream rounded-2xl shadow-[0_0_50px_0_rgba(125,48,24,0.12)] dark:shadow-[0_0_50px_0_rgba(0,0,0,0.5)] overflow-hidden">
+            <div className="absolute inset-0 legible-noise opacity-[0.05] mix-blend-overlay pointer-events-none" />
+            <div className="relative p-8 md:p-10">
+              {isSignedIn ? (
+                <Suspense fallback={<div className="h-96" />}>
+                  <AuditForm />
+                </Suspense>
+              ) : (
+                <SignUpCta />
+              )}
+            </div>
+          </div>
         </section>
 
         {/* Pricing hint */}
-        <p className="text-center text-xs text-neutral-500 dark:text-neutral-400 mb-16">
+        <p className="text-center text-xs text-legible-text-faded mb-16">
           Free during beta. Sign up to start.{" "}
           <a
             href="/pricing"
-            className="underline underline-offset-2 hover:text-neutral-700 dark:hover:text-neutral-300"
+            className="underline underline-offset-2 hover:text-legible-orange transition-colors"
           >
             pricing →
           </a>
         </p>
 
         {/* What is MX */}
-        <section className="space-y-4 text-sm text-neutral-700 dark:text-neutral-300 leading-relaxed border-t border-neutral-200 dark:border-neutral-800 pt-12">
-          <h2 className="text-base font-medium text-neutral-900 dark:text-neutral-100">
+        <section className="space-y-4 text-sm text-legible-text-muted leading-relaxed border-t border-legible-cream pt-12">
+          <h2 className="text-base font-light text-legible-text">
             What is Machine Experience?
           </h2>
           <p>
@@ -75,7 +80,7 @@ export default async function LandingPage() {
             server-rendered content. Legible audits your design for all of
             them and tells your devs exactly what to change.
           </p>
-          <p className="text-neutral-500 dark:text-neutral-400 text-xs pt-4">
+          <p className="text-legible-text-faded text-xs pt-4">
             Powered by Anthropic Claude. Not affiliated with Figma.
           </p>
         </section>

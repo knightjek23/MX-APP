@@ -57,10 +57,10 @@ export function AuditForm() {
   }
 
   const inputClass =
-    "w-full px-3 py-2 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900 text-neutral-900 dark:text-neutral-100 text-sm placeholder:text-neutral-400 dark:placeholder:text-neutral-500 focus:outline-none focus:ring-2 focus:ring-neutral-900 dark:focus:ring-neutral-100 focus:border-transparent transition-shadow";
+    "w-full px-3 py-2 rounded-lg border border-legible-cream bg-white dark:bg-legible-bg text-legible-text text-sm font-light placeholder:text-legible-text-faded focus:outline-none focus:ring-2 focus:ring-legible-orange/60 focus:border-transparent transition-shadow";
 
   const labelClass =
-    "block text-xs font-medium text-neutral-700 dark:text-neutral-300 mb-1.5";
+    "block text-xs font-light text-legible-text mb-1.5";
 
   return (
     <form
@@ -96,7 +96,7 @@ export function AuditForm() {
         <button
           type="button"
           onClick={() => setShowNodeId((s) => !s)}
-          className="flex items-center gap-1 text-xs text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100"
+          className="flex items-center gap-1 text-xs font-light text-legible-text-muted hover:text-legible-text transition-colors"
         >
           <ChevronDown
             className={`w-3 h-3 transition-transform ${showNodeId ? "rotate-180" : ""}`}
@@ -117,7 +117,7 @@ export function AuditForm() {
               data-1p-ignore="true"
               data-lpignore="true"
             />
-            <p className="text-[11px] text-neutral-500 dark:text-neutral-500 mt-1">
+            <p className="text-[11px] font-light text-legible-text-faded mt-1">
               Right-click a frame in Figma → Copy link, then paste the URL
               above. The node ID gets picked up automatically.
             </p>
@@ -132,7 +132,7 @@ export function AuditForm() {
             href="https://help.figma.com/hc/en-us/articles/8085703771159-Manage-personal-access-tokens"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-normal text-neutral-500 dark:text-neutral-400 underline underline-offset-2"
+            className="font-light text-legible-text-faded underline underline-offset-2 hover:text-legible-orange transition-colors"
           >
             How do I get one?
           </a>
@@ -153,7 +153,7 @@ export function AuditForm() {
           data-1p-ignore="true"
           data-lpignore="true"
         />
-        <p className="text-[11px] text-neutral-500 dark:text-neutral-500 mt-1">
+        <p className="text-[11px] font-light text-legible-text-faded mt-1">
           Used once to fetch the file, then discarded. Never stored.
         </p>
       </div>
@@ -167,7 +167,7 @@ export function AuditForm() {
       <button
         type="submit"
         disabled={pending || !figmaUrl.trim() || !figmaPat.trim()}
-        className="w-full inline-flex items-center justify-center gap-2 px-4 py-2.5 rounded-lg bg-neutral-900 dark:bg-neutral-100 text-neutral-100 dark:text-neutral-900 text-sm font-medium hover:bg-neutral-800 dark:hover:bg-neutral-200 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+        className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-legible-orange text-white font-mono text-sm shadow-[inset_0_0_0_2px_var(--legible-orange-inner),0_0_0_2px_var(--legible-orange-edge)] hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
       >
         {pending ? (
           <>
@@ -179,7 +179,7 @@ export function AuditForm() {
         )}
       </button>
 
-      <p className="text-center text-[11px] text-neutral-500 dark:text-neutral-500">
+      <p className="text-center text-[11px] font-light text-legible-text-faded">
         Most audits take 15 to 45 seconds.
       </p>
     </form>

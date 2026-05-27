@@ -10,6 +10,17 @@
   --font-sans: var(--font-sans);
   --font-mono: var(--font-geist-mono);
   --font-heading: var(--font-sans);
+  /* Legible brand tokens — surface across landing + global frame. */
+  --color-legible-bg: var(--legible-bg);
+  --color-legible-surface: var(--legible-surface);
+  --color-legible-orange: var(--legible-orange);
+  --color-legible-orange-edge: var(--legible-orange-edge);
+  --color-legible-orange-inner: var(--legible-orange-inner);
+  --color-legible-cream: var(--legible-cream);
+  --color-legible-sand: var(--legible-sand);
+  --color-legible-text: var(--legible-text);
+  --color-legible-text-muted: var(--legible-text-muted);
+  --color-legible-text-faded: var(--legible-text-faded);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -51,6 +62,17 @@
 :root {
   --background: oklch(1 0 0);
   --foreground: oklch(0.145 0 0);
+  /* Legible brand tokens — light mode (per Figma file pH02l4LSxYinEiAbxL62cS). */
+  --legible-bg: #fff9f7;          /* Legible White — page background */
+  --legible-surface: #ffffff;     /* form card surface base */
+  --legible-orange: #c84b24;      /* primary terracotta, CTA + wordmark */
+  --legible-orange-edge: #f27249; /* CTA outer border */
+  --legible-orange-inner: #ffe5dc;/* CTA inner border / soft peach */
+  --legible-cream: #fcebc1;       /* glassmorph card border */
+  --legible-sand: #e8d8b0;        /* glassmorph stroke / outer ring */
+  --legible-text: #262626;        /* primary heading */
+  --legible-text-muted: #606060;  /* subhead, body */
+  --legible-text-faded: #828282;  /* italic stat, faint labels */
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
@@ -86,6 +108,17 @@
 .dark {
   --background: oklch(0.145 0 0);
   --foreground: oklch(0.985 0 0);
+  /* Legible brand tokens — dark mode derivation. Warm dark to complement terracotta. */
+  --legible-bg: #1a1311;           /* warm near-black */
+  --legible-surface: #241d1a;      /* surface card base */
+  --legible-orange: #e55a2e;       /* brightened terracotta for dark contrast */
+  --legible-orange-edge: #ff7b52;
+  --legible-orange-inner: #3a2218;
+  --legible-cream: #3a2f22;        /* warm dark card border */
+  --legible-sand: #5a4d3a;         /* glassmorph stroke dark */
+  --legible-text: #fff9f7;         /* Legible white as primary text on dark */
+  --legible-text-muted: #b5aea7;
+  --legible-text-faded: #8b847d;
   --card: oklch(0.205 0 0);
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
@@ -126,5 +159,15 @@
   }
   html {
     @apply font-sans;
+  }
+}
+
+/* Glassmorph noise overlay — used inside the landing form card per Figma.
+   Inline SVG turbulence avoids shipping a binary asset. */
+@layer utilities {
+  .legible-noise {
+    background-image: url("data:image/svg+xml;utf8,<svg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' stitchTiles='stitch'/></filter><rect width='100%25' height='100%25' filter='url(%23n)'/></svg>");
+    background-size: 220px 220px;
+    background-repeat: repeat;
   }
 }
