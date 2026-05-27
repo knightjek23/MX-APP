@@ -17,8 +17,13 @@ export default async function LandingPage() {
   const isSignedIn = !!userId;
 
   return (
-    <main className="min-h-screen bg-legible-bg text-legible-text">
-      <div className="max-w-xl mx-auto px-6 py-16 md:py-24">
+    <main className="relative min-h-screen bg-legible-bg text-legible-text">
+      {/* Decorative organic shapes — hero backdrop. Hidden in dark mode. */}
+      <div
+        aria-hidden="true"
+        className="absolute left-0 right-0 top-0 aspect-[1440/690] bg-[url('/landing-bg.png')] bg-cover bg-no-repeat bg-center pointer-events-none dark:hidden"
+      />
+      <div className="relative max-w-xl mx-auto px-6 py-16 md:py-24">
         {/* Hero */}
         <section className="text-center mb-12">
           <h1 className="font-extralight text-[28px] md:text-[35px] leading-[1.345] tracking-tight text-legible-text mb-4">
