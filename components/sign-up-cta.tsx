@@ -22,7 +22,7 @@ export function SignUpCta() {
       <div className="flex items-center justify-center gap-4">
         <Link
           href="/sign-up"
-          className="inline-flex items-center justify-center px-5 py-2.5 rounded-lg bg-legible-orange text-white font-mono text-sm shadow-[inset_0_0_0_2px_var(--legible-orange-inner),0_0_0_2px_var(--legible-orange-edge)] hover:opacity-90 transition-opacity"
+          className="legible-cta-stroke inline-flex items-center justify-center px-5 py-2.5 rounded-lg text-white font-mono text-sm hover:opacity-90 transition-opacity"
         >
           Sign up
         </Link>

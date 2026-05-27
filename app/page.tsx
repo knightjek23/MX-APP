@@ -18,10 +18,12 @@ export default async function LandingPage() {
 
   return (
     <main className="relative min-h-screen bg-legible-bg text-legible-text">
-      {/* Decorative organic shapes — hero backdrop. Hidden in dark mode. */}
+      {/* Decorative organic shapes — viewport-fixed so they stay put as the
+          page scrolls. Hidden in dark mode. -z-10 keeps the layer behind
+          content while sitting above main's bg color. */}
       <div
         aria-hidden="true"
-        className="absolute left-0 right-0 top-0 aspect-[1440/690] bg-[url('/landing-bg.png')] bg-cover bg-no-repeat bg-center pointer-events-none dark:hidden"
+        className="fixed inset-0 -z-10 bg-[url('/landing-bg.png')] bg-cover bg-no-repeat bg-center pointer-events-none dark:hidden"
       />
       <div className="relative max-w-xl mx-auto px-6 py-16 md:py-24">
         {/* Hero */}

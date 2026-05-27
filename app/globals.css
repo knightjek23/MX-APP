@@ -170,4 +170,22 @@
     background-size: 220px 220px;
     background-repeat: repeat;
   }
+
+  /* Primary CTA gradient stroke. Two-layer background trick: solid terracotta
+     on padding-box, multi-stop gradient on border-box, transparent border to
+     reveal the gradient layer. Plays nice with border-radius (unlike
+     border-image). Reused across "Run audit" and "Sign up" primary CTAs. */
+  .legible-cta-stroke {
+    background:
+      linear-gradient(var(--legible-orange), var(--legible-orange)) padding-box,
+      linear-gradient(
+        270deg,
+        #ffe5dc 0%,
+        #a8a8a8 21.63%,
+        #dedede 50%,
+        #e39076 72.6%,
+        #e7e7e7 100%
+      ) border-box;
+    border: 2px solid transparent;
+  }
 }

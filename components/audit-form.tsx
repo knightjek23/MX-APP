@@ -167,7 +167,7 @@ export function AuditForm() {
       <button
         type="submit"
         disabled={pending || !figmaUrl.trim() || !figmaPat.trim()}
-        className="w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-lg bg-legible-orange text-white font-mono text-sm shadow-[inset_0_0_0_2px_var(--legible-orange-inner),0_0_0_2px_var(--legible-orange-edge)] hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+        className="legible-cta-stroke w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-white font-mono text-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
       >
         {pending ? (
           <>
