@@ -18,20 +18,6 @@ export default async function LandingPage() {
 
   return (
     <main className="relative isolate min-h-screen text-legible-text bg-legible-bg bg-[url('/landing-bg.png')] bg-cover bg-no-repeat bg-center bg-fixed dark:bg-none">
-      {/* Falling stars — minimal ambient layer, parallel diagonal trails,
-          viewport-fixed so they stay anchored as the page scrolls. */}
-      <div className="legible-stars" aria-hidden="true">
-        {Array.from({ length: 6 }).map((_, i) => (
-          <span
-            key={i}
-            style={{
-              left: `${15 + i * 14}%`,
-              animationDelay: `${(i * 2.3) % 12}s`,
-              animationDuration: `${12 + (i % 3) * 3}s`,
-            }}
-          />
-        ))}
-      </div>
       <div className="relative z-10 max-w-xl mx-auto px-6 py-16 md:py-24">
         {/* Hero */}
         <section className="text-center mb-12">
