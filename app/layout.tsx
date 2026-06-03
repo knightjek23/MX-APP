@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { Geist, Geist_Mono, Inter } from "next/font/google";
+import { Geist, Geist_Mono, Inter, Lora } from "next/font/google";
 import { ClerkProvider } from "@clerk/nextjs";
 import { HeaderNav } from "@/components/header-nav";
 import "./globals.css";
@@ -15,6 +15,14 @@ const geistSans = Geist({
 const geistMono = Geist_Mono({
   variable: "--font-geist-mono",
   subsets: ["latin"],
+});
+
+// Lora — brand serif. Used for the Legible wordmark and primary CTAs per
+// Figma spec (nodes 16:12154 and 16:12137).
+const lora = Lora({
+  variable: "--font-lora",
+  subsets: ["latin"],
+  weight: ["400"],
 });
 
 export const metadata: Metadata = {
@@ -37,6 +45,7 @@ export default function RootLayout({
           "antialiased",
           geistSans.variable,
           geistMono.variable,
+          lora.variable,
           "font-sans",
           inter.variable
         )}

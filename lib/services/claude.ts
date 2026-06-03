@@ -42,7 +42,7 @@ export class ClaudeNoToolUseError extends Error {
 
 export class ClaudeRateLimitError extends Error {
   constructor() {
-    super("The audit service is overloaded right now. Wait a moment and try again.");
+    super("Claude is overloaded right now. Wait a moment and try again.");
     this.name = "ClaudeRateLimitError";
   }
 }

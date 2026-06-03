@@ -8,7 +8,8 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ChevronDown, Loader2 } from "lucide-react";
+import { ChevronDown } from "lucide-react";
+import { AuditProgress, extractFigmaFileName } from "./audit-progress";
 
 export function AuditForm() {
   const router = useRouter();
@@ -61,6 +62,14 @@ export function AuditForm() {
 
   const labelClass =
     "block text-xs font-light text-legible-text mb-1.5";
+
+  // While the audit is running, swap the form body for the dynamic
+  // checklist (ai-transparency-patterns: Dynamic Checklist pattern).
+  // The form unmounts on success (router.push) or re-renders with an
+  // error message on failure.
+  if (pending) {
+    return <AuditProgress fileName={extractFigmaFileName(figmaUrl)} />;
+  }
 
   return (
     <form
@@ -166,17 +175,10 @@ export function AuditForm() {
 
       <button
         type="submit"
-        disabled={pending || !figmaUrl.trim() || !figmaPat.trim()}
-        className="legible-cta-stroke w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-white font-mono text-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+        disabled={!figmaUrl.trim() || !figmaPat.trim()}
+        className="legible-cta-stroke w-full inline-flex items-center justify-center gap-2 px-4 py-3 rounded-lg text-white font-brand text-sm hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
       >
-        {pending ? (
-          <>
-            <Loader2 className="w-4 h-4 animate-spin" />
-            Auditing…
-          </>
-        ) : (
-          "Run audit"
-        )}
+        Run audit
       </button>
 
       <p className="text-center text-[11px] font-light text-legible-text-faded">

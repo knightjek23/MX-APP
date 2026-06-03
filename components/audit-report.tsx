@@ -23,8 +23,16 @@ interface Props {
 }
 
 export function AuditReport({ audit, viewerUserId }: Props) {
-  const { audit_json, figma_url, figma_file_id, run_at_utc, model, scope } =
-    audit;
+  const {
+    audit_json,
+    figma_url,
+    figma_file_id,
+    run_at_utc,
+    model,
+    scope,
+    latency_ms,
+  } = audit;
+  const latencySeconds = Math.round(latency_ms / 100) / 10;
 
   const frameName = audit_json.frames[0]?.name ?? "Unnamed frame";
   const scopeLabel = scope === "full-file" ? "Full file" : "Single frame";
@@ -53,6 +61,8 @@ export function AuditReport({ audit, viewerUserId }: Props) {
               <span>{formatDate(run_at_utc)}</span>
               <span>·</span>
               <span>{model}</span>
+              <span>·</span>
+              <span>{latencySeconds}s</span>
               <span>·</span>
               <span className="inline-flex items-center px-1.5 py-0.5 rounded bg-neutral-200/60 dark:bg-neutral-800 text-neutral-700 dark:text-neutral-300 text-[11px]">
                 {scopeLabel}

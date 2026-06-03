@@ -17,11 +17,11 @@ import { Show, UserButton } from "@clerk/nextjs";
 
 export function HeaderNav() {
   return (
-    <header className="border-b border-legible-cream dark:border-legible-cream bg-legible-bg/95 dark:bg-legible-bg/95 backdrop-blur-sm">
+    <header className="relative z-50 border-b border-legible-cream dark:border-legible-cream bg-legible-bg dark:bg-legible-bg shadow-[0_4px_35.2px_0_rgba(125,48,24,0.10)]">
       <div className="max-w-4xl mx-auto px-6 h-12 flex items-center justify-between">
         <Link
           href="/"
-          className="font-mono text-xl text-legible-orange hover:opacity-80 transition-opacity"
+          className="font-brand text-xl text-legible-orange hover:opacity-80 transition-opacity"
         >
           Legible
         </Link>
@@ -50,7 +50,7 @@ export function HeaderNav() {
             </Link>
             <Link
               href="/sign-up"
-              className="font-mono text-xs px-3 py-1.5 rounded-lg bg-legible-orange text-white hover:opacity-90 transition-opacity"
+              className="font-brand text-xs px-3 py-1.5 rounded-lg bg-legible-orange text-white hover:opacity-90 transition-opacity"
             >
               Sign up
             </Link>
