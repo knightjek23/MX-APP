@@ -5,8 +5,11 @@
  *
  * Per the ai-transparency-patterns skill: a 30-second AI-driven wait
  * needs more than a spinner. This component shows the actual stages of
- * the audit pipeline as a labeled checklist, with each stage advancing
- * on a timer tuned to the real route latencies.
+ * the audit pipeline as a labeled list. Stages reveal one by one as
+ * the audit progresses (only completed + active stages are rendered),
+ * so the user sees fresh "new work" appearing rather than a static
+ * checklist counting down. The active stage's text shimmers (gradient
+ * sweep) to reinforce that work is in progress on that step.
  *
  * Stage timings are estimates from PROJECT.md (typical ~29s total):
  *   1. Fetching from Figma:    ~3s
@@ -84,6 +87,12 @@ export function AuditProgress({ fileName }: Props) {
     return () => timeouts.forEach(clearTimeout);
   }, []);
 
+  // Only render stages we've reached: completed ones + the active one.
+  // Pending stages aren't shown until they become active, so the
+  // checklist reveals progressively rather than counting down a
+  // pre-visible list.
+  const visibleStages = STAGES.slice(0, currentStage + 1);
+
   return (
     <div className="text-center">
       <p className="font-brand text-lg text-legible-text mb-1">
@@ -93,36 +102,31 @@ export function AuditProgress({ fileName }: Props) {
         Free during beta · About 30 seconds
       </p>
       <ul className="space-y-3 text-left">
-        {STAGES.map((stage, index) => {
-          const status =
-            index < currentStage
-              ? "done"
-              : index === currentStage
-                ? "active"
-                : "pending";
+        {visibleStages.map((stage, index) => {
+          const isActive = index === currentStage;
           return (
             <li
               key={stage.id}
-              className={`flex items-center gap-3 transition-opacity duration-300 ${
-                status === "pending" ? "opacity-40" : "opacity-100"
-              }`}
+              // animate-in/slide-in-from-bottom-2 from tw-animate-css
+              // plays once when each new <li> mounts (each stage's key
+              // is stable, so existing entries don't re-animate when
+              // the array grows).
+              className="flex items-center gap-3 animate-in fade-in slide-in-from-bottom-2 duration-500"
             >
               <span
                 className="shrink-0 w-5 h-5 flex items-center justify-center"
                 aria-hidden="true"
               >
-                {status === "done" ? (
-                  <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
-                ) : status === "active" ? (
+                {isActive ? (
                   <Loader2 className="w-4 h-4 animate-spin text-legible-orange" />
                 ) : (
-                  <span className="w-1.5 h-1.5 rounded-full bg-legible-text-faded" />
+                  <Check className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
                 )}
               </span>
               <span
                 className={`text-sm font-light leading-snug ${
-                  status === "active"
-                    ? "text-legible-text"
+                  isActive
+                    ? "legible-shimmer-text"
                     : "text-legible-text-muted"
                 }`}
               >

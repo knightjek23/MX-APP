@@ -8,7 +8,7 @@
 
 import { useState, useEffect } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { ChevronDown } from "lucide-react";
+import { ChevronDown, RotateCw } from "lucide-react";
 import { AuditProgress, extractFigmaFileName } from "./audit-progress";
 
 export function AuditForm() {
@@ -28,8 +28,11 @@ export function AuditForm() {
     if (prefilled) setFigmaUrl(prefilled);
   }, [searchParams]);
 
-  async function onSubmit(e: React.FormEvent) {
-    e.preventDefault();
+  // Submit the audit. Extracted from onSubmit so the "Try again" button
+  // inside the error box can call it directly without going through the
+  // form's submit event.
+  async function submitAudit() {
+    if (!figmaUrl.trim() || !figmaPat.trim()) return;
     setError(null);
     setPending(true);
     try {
@@ -51,10 +54,17 @@ export function AuditForm() {
       router.push(`/audit/${body.slug}`);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Connection dropped. Check your network and try again."
+        err instanceof Error
+          ? err.message
+          : "Connection dropped. Check your network and try again."
       );
       setPending(false);
     }
+  }
+
+  async function onSubmit(e: React.FormEvent) {
+    e.preventDefault();
+    await submitAudit();
   }
 
   const inputClass =
@@ -168,8 +178,19 @@ export function AuditForm() {
       </div>
 
       {error && (
-        <div className="px-3 py-2 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200/70 dark:border-red-900/50 text-sm text-red-700 dark:text-red-400">
-          {error}
+        <div className="px-3 py-3 rounded-lg bg-red-50 dark:bg-red-950/40 border border-red-200/70 dark:border-red-900/50">
+          <p className="text-sm text-red-700 dark:text-red-400 leading-snug mb-2">
+            {error}
+          </p>
+          <button
+            type="button"
+            onClick={submitAudit}
+            disabled={!figmaUrl.trim() || !figmaPat.trim()}
+            className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md bg-red-600 dark:bg-red-500 text-white text-xs font-medium hover:opacity-90 disabled:opacity-50 disabled:cursor-not-allowed transition-opacity"
+          >
+            <RotateCw className="w-3.5 h-3.5" />
+            Try again
+          </button>
         </div>
       )}
 

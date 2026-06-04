@@ -164,6 +164,15 @@
   }
 }
 
+@keyframes legible-shimmer {
+  from {
+    background-position: 100% center;
+  }
+  to {
+    background-position: -100% center;
+  }
+}
+
 @layer utilities {
   /* Crumpled-paper texture — landing background. Real paper photo at
      public/paper-texture3.jpg. Filled to the viewport via
@@ -177,6 +186,28 @@
     background-position: center;
     background-repeat: no-repeat;
     filter: brightness(1.3);
+  }
+
+  /* Shimmering text — for the active stage of the AuditProgress dynamic
+     checklist. Gradient (muted → terracotta → muted) is clipped to the
+     text glyphs and slid across via background-position animation, so
+     the text reads as "currently working" without needing a separate
+     spinner duplicate. Sweeps left to right. */
+  .legible-shimmer-text {
+    background-image: linear-gradient(
+      90deg,
+      var(--legible-text-muted) 0%,
+      var(--legible-text-muted) 30%,
+      var(--legible-orange) 50%,
+      var(--legible-text-muted) 70%,
+      var(--legible-text-muted) 100%
+    );
+    background-size: 200% auto;
+    background-clip: text;
+    -webkit-background-clip: text;
+    color: transparent;
+    -webkit-text-fill-color: transparent;
+    animation: legible-shimmer 2.5s ease-in-out infinite;
   }
 
   /* Primary CTA gradient stroke. Two-layer background trick: solid terracotta
