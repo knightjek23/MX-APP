@@ -97,6 +97,33 @@ export class AuditService {
   }
 
   /**
+   * Count total audits owned by a specific user. Used to enforce the
+   * beta hard cap (currently 5 per user) in the audit route, so we can
+   * block before doing any expensive Figma/Claude work.
+   *
+   * Uses Supabase's `head: true` so no row data is transferred — just
+   * the count. ~50ms RTT.
+   *
+   * @param userId  Clerk user identifier
+   */
+  async countByUser(userId: string): Promise<number> {
+    const { count, error } = await this.db
+      .from("audits")
+      .select("*", { count: "exact", head: true })
+      .eq("user_id", userId);
+
+    if (error) {
+      logger.error("audit.countByUser.failed", {
+        userId,
+        error: error.message,
+      });
+      throw new AuditFetchError(error.message);
+    }
+
+    return count ?? 0;
+  }
+
+  /**
    * Delete an audit by slug, scoped to a specific user. Filters on BOTH
    * slug AND user_id so a non-owner can't delete by guessing the URL.
    *

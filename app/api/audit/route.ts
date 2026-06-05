@@ -46,6 +46,11 @@ import { logger } from "@/lib/logger";
 
 const MAX_FRAMES = Number(process.env.AUDIT_MAX_FRAMES) || 50;
 
+// Hard cap on lifetime audits per user during beta. Override at runtime
+// via the AUDIT_BETA_CAP env var (Vercel project settings) when you want
+// to bump a single user's allowance or open the gates more broadly.
+const BETA_AUDIT_CAP = Number(process.env.AUDIT_BETA_CAP) || 5;
+
 const RequestSchema = z.object({
   figma_url: z.string().min(1, "Figma URL is required."),
   figma_pat: z.string().min(1, "Figma token is required."),
@@ -73,6 +78,33 @@ export async function POST(request: NextRequest) {
   const { userId } = await auth();
   if (!userId) {
     return errorResponse(401, "Sign in to run an audit.", "auth_required");
+  }
+
+  // 0.5. Enforce the beta hard cap. Counts lifetime audits for this user
+  // and blocks at the threshold. Done before body parse / rate limit /
+  // Figma fetch / Claude so users at the cap never trigger expensive work.
+  // 402 Payment Required is the semantic match — the user is out of free
+  // allowance and needs to do something (email Josh) to continue.
+  const auditService = new AuditService(getSupabaseClient());
+  try {
+    const used = await auditService.countByUser(userId);
+    if (used >= BETA_AUDIT_CAP) {
+      return errorResponse(
+        402,
+        `You've used all ${BETA_AUDIT_CAP} beta audits. Email hello@legible.design with what you'd want to see next and I'll top you up.`,
+        "beta_cap_reached"
+      );
+    }
+  } catch (err) {
+    logger.error("audit.route.cap_check_failed", {
+      userId,
+      error: String(err),
+    });
+    return errorResponse(
+      503,
+      "Couldn't check your usage on our end. Try again in a moment.",
+      "cap_check_unavailable"
+    );
   }
 
   // 1. Parse body
@@ -179,8 +211,8 @@ export async function POST(request: NextRequest) {
       frameCount,
     });
 
-    // 8. Persist
-    const auditService = new AuditService(getSupabaseClient());
+    // 8. Persist (auditService is the same instance created at the top
+    // of the handler for the beta-cap count check)
     const { slug } = await auditService.persist({
       figma_file_id: fileId,
       figma_node_id: effectiveNodeId ?? null,
