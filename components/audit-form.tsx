@@ -68,7 +68,7 @@ export function AuditForm() {
   }
 
   const inputClass =
-    "w-full px-3 py-2 rounded-lg border border-legible-cream bg-white dark:bg-legible-bg text-legible-text text-sm font-light placeholder:text-legible-text-faded focus:outline-none focus:ring-2 focus:ring-legible-orange/60 focus:border-transparent transition-shadow";
+    "w-full px-3 py-2 rounded-lg border border-legible-cream bg-legible-surface dark:bg-legible-bg text-legible-text text-sm font-light placeholder:text-legible-text-faded focus:outline-none focus:ring-2 focus:ring-legible-orange/60 focus:border-transparent transition-shadow";
 
   const labelClass =
     "block text-xs font-light text-legible-text mb-1.5";

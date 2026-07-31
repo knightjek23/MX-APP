@@ -432,7 +432,7 @@ export default async function LandingPage() {
 
 function FormCard({ isSignedIn }: { isSignedIn: boolean }) {
   return (
-    <div className="relative bg-white dark:bg-legible-surface border border-legible-cream rounded-2xl shadow-[0_0_50px_0_rgba(125,48,24,0.12)] dark:shadow-[0_0_50px_0_rgba(0,0,0,0.5)] overflow-hidden">
+    <div className="relative bg-legible-surface dark:bg-legible-surface border border-legible-cream rounded-2xl shadow-[0_0_50px_0_rgba(125,48,24,0.12)] dark:shadow-[0_0_50px_0_rgba(0,0,0,0.5)] overflow-hidden">
       <div className="relative p-8 md:p-10">
         {isSignedIn ? (
           <Suspense fallback={<div className="h-96" />}>
@@ -609,7 +609,7 @@ function FooterCol({
  */
 function SampleReport() {
   return (
-    <div className="bg-white dark:bg-legible-surface border border-legible-cream rounded-2xl shadow-[0_0_50px_0_rgba(125,48,24,0.10)] dark:shadow-[0_0_50px_0_rgba(0,0,0,0.5)] overflow-hidden">
+    <div className="bg-legible-surface dark:bg-legible-surface border border-legible-cream rounded-2xl shadow-[0_0_50px_0_rgba(125,48,24,0.10)] dark:shadow-[0_0_50px_0_rgba(0,0,0,0.5)] overflow-hidden">
       {/* Browser chrome. Fully opaque bg so the page-level paper texture
           can't bleed through the strip into the audit example. */}
       <div className="flex items-center gap-3 px-4 py-3 border-b border-legible-cream bg-legible-bg dark:bg-legible-surface">
@@ -621,7 +621,7 @@ function SampleReport() {
             aria-hidden
           />
         </div>
-        <div className="flex-1 px-3 py-1 rounded-md bg-white border border-legible-cream font-mono text-[11px] text-legible-text-faded truncate">
+        <div className="flex-1 px-3 py-1 rounded-md bg-legible-surface border border-legible-cream font-mono text-[11px] text-legible-text-faded truncate">
           legible.design/audit/a1b2c3d4e5
         </div>
       </div>

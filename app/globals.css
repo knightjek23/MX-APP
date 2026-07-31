@@ -62,11 +62,11 @@
 }
 
 :root {
-  --background: oklch(1 0 0);
+  --background: #efede9;
   --foreground: oklch(0.145 0 0);
   /* Legible brand tokens — light mode (per Figma file pH02l4LSxYinEiAbxL62cS). */
-  --legible-bg: #fff9f7;          /* Legible White — page background */
-  --legible-surface: #ffffff;     /* form card surface base */
+  --legible-bg: #efede9;          /* Bone — page background */
+  --legible-surface: #faf8f3;     /* form card surface base */
   --legible-orange: #c84b24;      /* primary terracotta, CTA + wordmark */
   --legible-orange-edge: #f27249; /* CTA outer border */
   --legible-orange-inner: #ffe5dc;/* CTA inner border / soft peach */
@@ -75,9 +75,9 @@
   --legible-text: #262626;        /* primary heading */
   --legible-text-muted: #606060;  /* subhead, body */
   --legible-text-faded: #828282;  /* italic stat, faint labels */
-  --card: oklch(1 0 0);
+  --card: #faf8f3;
   --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
+  --popover: #faf8f3;
   --popover-foreground: oklch(0.145 0 0);
   --primary: oklch(0.205 0 0);
   --primary-foreground: oklch(0.985 0 0);
@@ -97,7 +97,7 @@
   --chart-4: oklch(0.371 0 0);
   --chart-5: oklch(0.269 0 0);
   --radius: 0.625rem;
-  --sidebar: oklch(0.985 0 0);
+  --sidebar: #f5f3ee;
   --sidebar-foreground: oklch(0.145 0 0);
   --sidebar-primary: oklch(0.205 0 0);
   --sidebar-primary-foreground: oklch(0.985 0 0);

@@ -112,7 +112,7 @@ export function AnnotationCard({
   };
 
   return (
-    <article className="bg-white dark:bg-neutral-900 border border-neutral-200/70 dark:border-neutral-800 rounded-xl overflow-hidden">
+    <article className="bg-legible-surface dark:bg-neutral-900 border border-neutral-200/70 dark:border-neutral-800 rounded-xl overflow-hidden">
       <div className="p-4">
         <div className="flex items-center gap-2 mb-2 text-xs">
           <span
@@ -161,7 +161,7 @@ export function AnnotationCard({
               <button
                 type="button"
                 onClick={copy}
-                className="absolute top-2 right-2 p-1.5 rounded-md bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
+                className="absolute top-2 right-2 p-1.5 rounded-md bg-legible-surface dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 text-neutral-600 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 transition-colors"
                 aria-label="Copy code"
               >
                 {copied ? (

@@ -27,7 +27,7 @@ export function ViewToggle({ view, onChange }: Props) {
     <div
       role="tablist"
       aria-label="Annotation view"
-      className="inline-flex items-center gap-0.5 p-0.5 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900"
+      className="inline-flex items-center gap-0.5 p-0.5 rounded-lg border border-neutral-200 dark:border-neutral-800 bg-legible-surface dark:bg-neutral-900"
     >
       <button
         type="button"

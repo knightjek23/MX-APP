@@ -85,7 +85,7 @@ function AuditRow({ audit }: { audit: StoredAudit }) {
   const rerunUrl = `/?figma_url=${encodeURIComponent(stripFigmaQueryParams(audit.figma_url))}`;
 
   return (
-    <div className="group bg-white dark:bg-neutral-900 border border-neutral-200/70 dark:border-neutral-800 rounded-xl hover:border-neutral-300 dark:hover:border-neutral-700 transition-colors">
+    <div className="group bg-legible-surface dark:bg-neutral-900 border border-neutral-200/70 dark:border-neutral-800 rounded-xl hover:border-neutral-300 dark:hover:border-neutral-700 transition-colors">
       <div className="p-4 flex items-start justify-between gap-4">
         {/* Left: clickable link to the audit detail */}
         <Link

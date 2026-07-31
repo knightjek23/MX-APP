@@ -15,7 +15,7 @@ export default function SignUpPage() {
         appearance={{
           elements: {
             rootBox: "w-full max-w-sm",
-            card: "shadow-none border border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-900",
+            card: "shadow-none border border-neutral-200 dark:border-neutral-800 bg-legible-surface dark:bg-neutral-900",
           },
         }}
         signInUrl="/sign-in"

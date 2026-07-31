@@ -154,7 +154,7 @@ export function AuditRowMenu({ slug, shareLink, rerunUrl, figmaUrl }: Props) {
         {open && (
           <div
             role="menu"
-            className="absolute right-0 top-full mt-1 w-48 bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg shadow-lg p-1 z-20"
+            className="absolute right-0 top-full mt-1 w-48 bg-legible-surface dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-lg shadow-lg p-1 z-20"
           >
             <a
               role="menuitem"
@@ -255,7 +255,7 @@ function DeleteConfirmDialog({
         aria-hidden="true"
       />
       {/* Card */}
-      <div className="relative bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-xl p-6 w-full max-w-sm">
+      <div className="relative bg-legible-surface dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-800 rounded-xl shadow-xl p-6 w-full max-w-sm">
         <h2
           id="delete-audit-title"
           className="text-base font-medium text-neutral-900 dark:text-neutral-100 mb-2"
