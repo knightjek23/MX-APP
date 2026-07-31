@@ -10,6 +10,7 @@
  * the audit without retyping the URL.
  */
 
+import Link from "next/link";
 import { ExternalLink, RefreshCw, RotateCw } from "lucide-react";
 import { ScoreBadge } from "./score-badge";
 import { SummaryGrid } from "./summary-grid";
@@ -32,7 +33,8 @@ export function AuditReport({ audit, viewerUserId }: Props) {
     scope,
     latency_ms,
   } = audit;
-  const latencySeconds = Math.round(latency_ms / 100) / 10;
+  // latency_ms is nullable in the DB (older rows) — guard against NaN.
+  const latencySeconds = Math.round((latency_ms ?? 0) / 100) / 10;
 
   const frameName = audit_json.frames[0]?.name ?? "Unnamed frame";
   const scopeLabel = scope === "full-file" ? "Full file" : "Single frame";
@@ -113,13 +115,13 @@ export function AuditReport({ audit, viewerUserId }: Props) {
               Re-run this file
             </a>
           )}
-          <a
+          <Link
             href="/"
             className="inline-flex items-center gap-1.5 px-3 py-1.5 text-xs rounded-lg border border-neutral-200 dark:border-neutral-800 hover:bg-neutral-100 dark:hover:bg-neutral-900 transition-colors"
           >
             <RefreshCw className="w-3.5 h-3.5" />
             Run another audit
-          </a>
+          </Link>
         </footer>
       </div>
     </main>

@@ -215,6 +215,8 @@
      reveal the gradient layer. Plays nice with border-radius (unlike
      border-image). Reused across "Run audit" and "Sign up" primary CTAs. */
   .legible-cta-stroke {
+    position: relative;
+    isolation: isolate;
     background:
       linear-gradient(var(--legible-orange), var(--legible-orange)) padding-box,
       linear-gradient(
@@ -226,5 +228,37 @@
         #e7e7e7 100%
       ) border-box;
     border: 2px solid transparent;
+    transition: filter 0.22s ease;
+  }
+
+  /* Knight UX stroke-lighten hover, in Legible terracotta. A brighter terracotta
+     rim lightens in over the static gradient stroke and the surface lifts one
+     step. No scale, so nothing reflows. Applies to "Run audit" + "Sign up". */
+  .legible-cta-stroke::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    box-sizing: border-box;
+    border-radius: inherit;
+    padding: 2px;
+    background: var(--legible-orange-edge);
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+            mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.22s ease;
+    z-index: 1;
+    pointer-events: none;
+  }
+  .legible-cta-stroke:hover,
+  .legible-cta-stroke:focus-visible {
+    opacity: 1 !important;
+    filter: brightness(1.05);
+  }
+  .legible-cta-stroke:hover::after,
+  .legible-cta-stroke:focus-visible::after {
+    opacity: 1;
   }
 }

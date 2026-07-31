@@ -60,8 +60,8 @@ export default async function LandingPage() {
             ship.
           </p>
           <p className="text-xs text-legible-text-faded italic">
-            51% of web traffic is non-human. Most sites are built for the other
-            49%.
+            53% of web traffic is non-human. Most sites are built for the other
+            47%.
           </p>
         </div>
 
@@ -90,17 +90,20 @@ export default async function LandingPage() {
       <section className="bg-white/40 border-y border-legible-cream">
         <div className="max-w-5xl mx-auto px-6 py-12 md:py-16">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-10 text-center">
+            {/* Sources per legible-gtm-research-report.md (2026-06):
+                Imperva Bad Bot Report 2026; CHI 2026 A11y-CUA (UC Berkeley /
+                Michigan); Seer Interactive (15.9% vs 1.76% conversion). */}
             <Stat
-              big="51%"
+              big="53%"
               body="of web traffic is now non-human, and growing."
             />
             <Stat
               big="78% → 28%"
-              body="Task success drops when the accessibility tree is impoverished."
+              body="Agent task success collapses when the agent loses clean access to the interface."
             />
             <Stat
-              big="13×"
-              body="Higher conversion from AI-sourced visitors than from traditional search."
+              big="9×"
+              body="Higher conversion rate from AI-sourced visitors than from organic search."
             />
           </div>
         </div>

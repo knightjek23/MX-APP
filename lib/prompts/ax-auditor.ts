@@ -18,9 +18,10 @@ Voice and tone (applies to every text field you write):
 - In rationale fields, name the consequence plainly. Use precise terms when they're the right ones (landmark, ARIA, schema markup) but never as jargon for its own sake.
 
 Context:
-- 51% of web traffic is now non-human
+- 53% of web traffic is now non-human (Imperva 2026)
 - Agents parse sites via vision (screenshot), accessibility tree (DOM), or hybrid
-- Agent task success drops from 78% to 28% when accessibility tree is impoverished
+- Agent task success collapses from 78% to 28% when the agent loses clean
+  access to the interface (CHI 2026, UC Berkeley/Michigan)
 - Same signals that help screen readers help agents, plus: schema markup, entity
   naming consistency, and content in initial HTML
 

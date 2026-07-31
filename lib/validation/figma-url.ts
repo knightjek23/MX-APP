@@ -26,6 +26,16 @@ export interface ParsedFigmaUrl {
   nodeId?: string;
 }
 
+/**
+ * Normalize a node ID to the colon form the Figma REST API expects.
+ * Accepts "31:198" (canonical), "31-198" (what Figma's "Copy link"
+ * puts in URLs today), and "31%3A198" (legacy URL-encoded).
+ */
+export function normalizeNodeId(raw: string): string {
+  const decoded = raw.includes("%") ? decodeURIComponent(raw) : raw;
+  return decoded.includes(":") ? decoded : decoded.replace(/-/g, ":");
+}
+
 const FIGMA_URL_RE =
   /^https?:\/\/(?:www\.)?figma\.com\/(?:file|design)\/([A-Za-z0-9]+)(?:\/[^?]*)?(?:\?(.*))?$/;
 
@@ -54,7 +64,7 @@ export function parseFigmaUrl(input: string): ParsedFigmaUrl {
     if (raw) {
       // URLSearchParams decodes %3A → :. If the URL used dashes (1-2) we
       // still need to convert those to colons for the API.
-      nodeId = raw.includes(":") ? raw : raw.replace(/-/g, ":");
+      nodeId = normalizeNodeId(raw);
     }
   }
 

@@ -16,7 +16,12 @@ import { Ratelimit } from "@upstash/ratelimit";
 import { Redis } from "@upstash/redis";
 import { createHash } from "node:crypto";
 
-const HASH_SALT = "legible-v1:";
+// Salt for IP hashing. The IPv4 space is small enough that a SHA-256 with a
+// public salt is reversible by brute force, so the salt should be a secret.
+// Set IP_HASH_SALT in Vercel env; the literal fallback keeps old hashes
+// comparable until the env var is set (rotating the salt breaks continuity
+// with previously stored user_ip_hash values — do it once, deliberately).
+const HASH_SALT = process.env.IP_HASH_SALT || "legible-v1:";
 const DEFAULT_RATE_LIMIT_PER_HOUR = 20;
 
 export function hashIp(ip: string): string {

@@ -29,7 +29,11 @@ import { logger } from "@/lib/logger";
 const COST_PER_INPUT_TOKEN = 3 / 1_000_000;
 const COST_PER_OUTPUT_TOKEN = 15 / 1_000_000;
 const MODEL = "claude-sonnet-4-5";
-const MAX_TOKENS = 8192;
+// 16k output headroom: a 50-frame full-file audit with dual-view copy on
+// every annotation can overflow 8k, which truncates the tool input mid-JSON
+// and surfaces as a confusing schema-validation error. Output tokens are
+// billed on actual usage, so the higher ceiling costs nothing on small runs.
+const MAX_TOKENS = 16384;
 
 export class ClaudeNoToolUseError extends Error {
   constructor() {
@@ -54,6 +58,15 @@ export class ClaudeValidationError extends Error {
   }
 }
 
+export class ClaudeTruncatedError extends Error {
+  constructor() {
+    super(
+      "The audit came back too large to finish in one pass. Scope to a specific frame (right-click a frame in Figma → Copy link) and try again."
+    );
+    this.name = "ClaudeTruncatedError";
+  }
+}
+
 export interface AuditMetrics {
   tokens_input: number;
   tokens_output: number;
@@ -66,6 +79,21 @@ export interface AuditOpts {
   fullFile: boolean;
   frameCount: number;
 }
+
+// Zod v4 native — converts the schema to JSON Schema (draft-7) in one call.
+// Anthropic's tools API accepts draft-7 JSON Schema as input_schema.
+// Computed once at module load — the schema never changes per request.
+const jsonSchema = z.toJSONSchema(AuditResultSchema, {
+  target: "draft-7",
+}) as Record<string, unknown>;
+// Anthropic doesn't want the $schema metadata field on the tool input schema.
+delete jsonSchema.$schema;
+
+const auditTool = {
+  name: "submit_audit",
+  description: "Submit the AX audit for this Figma design.",
+  input_schema: jsonSchema,
+};
 
 export class ClaudeService {
   private readonly client: Anthropic;
@@ -80,20 +108,6 @@ export class ClaudeService {
     opts: AuditOpts
   ): Promise<AuditResult & AuditMetrics> {
     const start = Date.now();
-
-    // Zod v4 native — converts the schema to JSON Schema (draft-7) in one call.
-    // Anthropic's tools API accepts draft-7 JSON Schema as input_schema.
-    const jsonSchema = z.toJSONSchema(AuditResultSchema, {
-      target: "draft-7",
-    }) as Record<string, unknown>;
-    // Anthropic doesn't want the $schema metadata field on the tool input schema.
-    delete jsonSchema.$schema;
-
-    const auditTool = {
-      name: "submit_audit",
-      description: "Submit the AX audit for this Figma design.",
-      input_schema: jsonSchema,
-    };
 
     const userPayload = {
       scope: opts.fullFile ? "full-file" : "single-frame",
@@ -126,6 +140,16 @@ export class ClaudeService {
     }
 
     const latency_ms = Date.now() - start;
+
+    // A max_tokens stop means the tool input JSON was cut off mid-stream.
+    // Without this check it surfaces as a cryptic schema-validation error.
+    if (response.stop_reason === "max_tokens") {
+      logger.warn("claude.audit.truncated", {
+        max_tokens: MAX_TOKENS,
+        output_tokens: response.usage.output_tokens,
+      });
+      throw new ClaudeTruncatedError();
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const toolBlock = (response.content as any[]).find(

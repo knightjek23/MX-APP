@@ -20,7 +20,11 @@
 import { NextRequest, NextResponse } from "next/server";
 import { auth } from "@clerk/nextjs/server";
 import { z } from "zod";
-import { parseFigmaUrl, FigmaUrlError } from "@/lib/validation/figma-url";
+import {
+  parseFigmaUrl,
+  normalizeNodeId,
+  FigmaUrlError,
+} from "@/lib/validation/figma-url";
 import {
   FigmaService,
   InvalidTokenError,
@@ -32,6 +36,7 @@ import {
   ClaudeRateLimitError,
   ClaudeNoToolUseError,
   ClaudeValidationError,
+  ClaudeTruncatedError,
 } from "@/lib/services/claude";
 import { AuditService, AuditPersistError } from "@/lib/services/audit";
 import { compactTree, countFrames, FileTooLargeError } from "@/lib/compact";
@@ -51,10 +56,18 @@ const MAX_FRAMES = Number(process.env.AUDIT_MAX_FRAMES) || 50;
 // to bump a single user's allowance or open the gates more broadly.
 const BETA_AUDIT_CAP = Number(process.env.AUDIT_BETA_CAP) || 5;
 
+// Max lengths are generous sanity bounds, not format validation — they stop
+// oversized payloads from reaching URL parsing, the Figma API, or the DB.
 const RequestSchema = z.object({
-  figma_url: z.string().min(1, "Figma URL is required."),
-  figma_pat: z.string().min(1, "Figma token is required."),
-  node_id: z.string().optional().nullable(),
+  figma_url: z
+    .string()
+    .min(1, "Figma URL is required.")
+    .max(2048, "That URL is too long to be a Figma file URL."),
+  figma_pat: z
+    .string()
+    .min(1, "Figma token is required.")
+    .max(512, "That doesn't look like a Figma token."),
+  node_id: z.string().max(128).optional().nullable(),
 });
 
 class OversizedFileError extends Error {
@@ -80,9 +93,28 @@ export async function POST(request: NextRequest) {
     return errorResponse(401, "Sign in to run an audit.", "auth_required");
   }
 
-  // 0.5. Enforce the beta hard cap. Counts lifetime audits for this user
-  // and blocks at the threshold. Done before body parse / rate limit /
-  // Figma fetch / Claude so users at the cap never trigger expensive work.
+  // 1. Parse body. Done before the beta-cap check — validation is free,
+  // the cap check costs a Supabase round trip. Malformed requests should
+  // never touch the database.
+  let body: unknown;
+  try {
+    body = await request.json();
+  } catch {
+    return errorResponse(400, "Invalid JSON in request body.", "invalid_json");
+  }
+
+  const parsed = RequestSchema.safeParse(body);
+  if (!parsed.success) {
+    return errorResponse(
+      400,
+      parsed.error.issues[0]?.message ?? "Invalid request body.",
+      "invalid_body"
+    );
+  }
+
+  // 1.5. Enforce the beta hard cap. Counts lifetime audits for this user
+  // and blocks at the threshold. Done before rate limit / Figma fetch /
+  // Claude so users at the cap never trigger expensive work.
   // 402 Payment Required is the semantic match — the user is out of free
   // allowance and needs to do something (email Josh) to continue.
   const auditService = new AuditService(getSupabaseClient());
@@ -104,23 +136,6 @@ export async function POST(request: NextRequest) {
       503,
       "Couldn't check your usage on our end. Try again in a moment.",
       "cap_check_unavailable"
-    );
-  }
-
-  // 1. Parse body
-  let body: unknown;
-  try {
-    body = await request.json();
-  } catch {
-    return errorResponse(400, "Invalid JSON in request body.", "invalid_json");
-  }
-
-  const parsed = RequestSchema.safeParse(body);
-  if (!parsed.success) {
-    return errorResponse(
-      400,
-      parsed.error.issues[0]?.message ?? "Invalid request body.",
-      "invalid_body"
     );
   }
 
@@ -151,7 +166,7 @@ export async function POST(request: NextRequest) {
       {
         error: {
           code: "rate_limited",
-          message: `Hit the 20-per-hour audit limit. Try again in ${resetMinutes} minute${resetMinutes === 1 ? "" : "s"}.`,
+          message: `Hit the ${rateLimit.limit}-per-hour audit limit. Try again in ${resetMinutes} minute${resetMinutes === 1 ? "" : "s"}.`,
           retry_after_seconds: resetSeconds,
         },
       },
@@ -170,9 +185,13 @@ export async function POST(request: NextRequest) {
   const { figma_url, figma_pat, node_id } = parsed.data;
 
   try {
-    // 3. Parse Figma URL
+    // 3. Parse Figma URL. A manually entered node_id gets the same
+    // normalization as one parsed from the URL — Figma's "Copy link"
+    // produces "31-198" but the REST API only accepts "31:198".
     const { fileId, nodeId: urlNodeId } = parseFigmaUrl(figma_url);
-    const effectiveNodeId = node_id || urlNodeId || undefined;
+    const effectiveNodeId = node_id
+      ? normalizeNodeId(node_id)
+      : urlNodeId || undefined;
     const scope: "full-file" | "single-frame" = effectiveNodeId
       ? "single-frame"
       : "full-file";
@@ -188,7 +207,7 @@ export async function POST(request: NextRequest) {
     }
 
     // 6. Compact (throws FileTooLargeError if still >120k tokens after reduction)
-    const { tree, frameCount, compactedTokens, reductionPercent } =
+    const { tree, frameCount, compactedTokens, reductionPercent, warnings } =
       compactTree(rawTree);
 
     logger.info("audit.route.compacted", {
@@ -199,6 +218,12 @@ export async function POST(request: NextRequest) {
       compactedTokens,
       reductionPercent,
     });
+
+    // Surface near-limit warnings in logs so dense files show up in
+    // observability before they start failing outright.
+    for (const warning of warnings) {
+      logger.warn("audit.route.compaction_warning", { fileId, warning });
+    }
 
     // 7. Run audit
     const apiKey = process.env.ANTHROPIC_API_KEY;
@@ -273,6 +298,9 @@ function handleError(err: unknown): NextResponse {
   }
   if (err instanceof ClaudeNoToolUseError) {
     return errorResponse(502, err.message, "claude_no_tool_use");
+  }
+  if (err instanceof ClaudeTruncatedError) {
+    return errorResponse(413, err.message, "audit_output_truncated");
   }
   if (err instanceof ClaudeValidationError) {
     logger.error("audit.route.claude_validation_error", { message: err.message });

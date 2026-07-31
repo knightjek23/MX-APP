@@ -87,6 +87,7 @@ const persistSpy = vi.fn(
     slug: "slug-test",
   })
 );
+const countByUserSpy = vi.fn(async () => 0);
 vi.mock("@/lib/services/audit", async () => {
   const actual = await vi.importActual<
     typeof import("@/lib/services/audit")
@@ -96,6 +97,9 @@ vi.mock("@/lib/services/audit", async () => {
     AuditService: class {
       constructor() {}
       persist = persistSpy;
+      // Beta-cap check runs before the pipeline; report zero usage so
+      // the happy-path tests aren't blocked by the cap.
+      countByUser = countByUserSpy;
     },
   };
 });

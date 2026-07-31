@@ -6,7 +6,7 @@
  * /audit/[slug] on success, displays error inline on failure.
  */
 
-import { useState, useEffect } from "react";
+import { useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import { ChevronDown, RotateCw } from "lucide-react";
 import { AuditProgress, extractFigmaFileName } from "./audit-progress";
@@ -15,18 +15,18 @@ export function AuditForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  const [figmaUrl, setFigmaUrl] = useState("");
+  // Pre-fill from ?figma_url=... when the entity-conflicts upsell or a
+  // "Re-run this file" link points back here. Initializing state from the
+  // search params (instead of syncing in an effect) avoids an extra render
+  // and the react-hooks/set-state-in-effect lint error.
+  const [figmaUrl, setFigmaUrl] = useState(
+    () => searchParams.get("figma_url") ?? ""
+  );
   const [nodeId, setNodeId] = useState("");
   const [figmaPat, setFigmaPat] = useState("");
   const [showNodeId, setShowNodeId] = useState(false);
   const [pending, setPending] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  // Pre-fill from ?figma_url=... when the entity-conflicts upsell links back.
-  useEffect(() => {
-    const prefilled = searchParams.get("figma_url");
-    if (prefilled) setFigmaUrl(prefilled);
-  }, [searchParams]);
 
   // Submit the audit. Extracted from onSubmit so the "Try again" button
   // inside the error box can call it directly without going through the
