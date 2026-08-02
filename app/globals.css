@@ -61,7 +61,38 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
+@theme {
+  /* A faster spinner makes the same load time feel shorter. Tailwind's default
+     is 1s. Own keyframe so the override does not depend on the default theme. */
+  --animate-spin: ku-spin 700ms linear infinite;
+
+  /* Bare `transition-*` utilities inherit these, so anything without an
+     explicit duration lands on the house hover timing rather than 150ms. */
+  --default-transition-duration: 160ms;
+}
+
+@keyframes ku-spin {
+  to { transform: rotate(360deg); }
+}
+
 :root {
+  /* ---- Knight UX motion tokens ----------------------------------------
+     Shared across all four products. Easing first, then the duration ladder.
+     The built-in CSS keywords are deliberately weak curves; these have the
+     punch that makes motion read as intentional. Never ease-in on UI: it
+     delays the first frame, which is the frame the user is watching. */
+  --ku-ease-out:    cubic-bezier(0.23, 1, 0.32, 1);
+  --ku-ease-in-out: cubic-bezier(0.77, 0, 0.175, 1);
+  --ku-ease-drawer: cubic-bezier(0.32, 0.72, 0, 1);
+
+  --ku-dur-press:   120ms;  /* :active feedback */
+  --ku-dur-hover:   160ms;  /* colour crossfades */
+  --ku-dur-tooltip: 140ms;
+  --ku-dur-pop:     200ms;  /* dropdowns, rings, small popovers */
+  --ku-dur-modal:   260ms;  /* modals, drawers, sheets */
+  --ku-dur-reveal:  600ms;  /* marketing scroll reveal only */
+  --ku-dur-spin:    700ms;
+
   --background: #efede9;
   --foreground: oklch(0.145 0 0);
   /* Legible brand tokens — light mode (per Figma file pH02l4LSxYinEiAbxL62cS). */
@@ -228,7 +259,14 @@
         #e7e7e7 100%
       ) border-box;
     border: 2px solid transparent;
-    transition: filter 0.22s ease;
+    transition:
+      filter var(--ku-dur-hover) ease,
+      transform var(--ku-dur-press) var(--ku-ease-out);
+  }
+
+  /* Press feedback. The button must feel like it heard you. */
+  .legible-cta-stroke:not(:disabled):active {
+    transform: scale(0.97);
   }
 
   /* Knight UX stroke-lighten hover, in Legible terracotta. A brighter terracotta
@@ -248,17 +286,56 @@
     -webkit-mask-composite: xor;
             mask-composite: exclude;
     opacity: 0;
-    transition: opacity 0.22s ease;
+    transition: opacity var(--ku-dur-pop) var(--ku-ease-out);
     z-index: 1;
     pointer-events: none;
   }
-  .legible-cta-stroke:hover,
+
+  /* Hover is gated behind a real pointer. On touch, a tap fires :hover and the
+     state sticks until the next tap somewhere else. */
+  @media (hover: hover) and (pointer: fine) {
+    .legible-cta-stroke:hover {
+      filter: brightness(1.05);
+    }
+    .legible-cta-stroke:hover::after {
+      opacity: 1;
+    }
+  }
+
   .legible-cta-stroke:focus-visible {
-    opacity: 1 !important;
     filter: brightness(1.05);
   }
-  .legible-cta-stroke:hover::after,
   .legible-cta-stroke:focus-visible::after {
     opacity: 1;
+  }
+}
+
+/* Reduced motion means less movement, not no transitions. Movement and looping
+   animation stop; colour, opacity and shadow still crossfade, so state changes
+   stay readable rather than snapping like glitches. Legible had no block at all
+   despite an infinite 2.5s shimmer and a spinner. */
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-property:
+      background-color, border-color, color, fill, stroke, opacity,
+      box-shadow, filter !important;
+  }
+
+  /* The shimmer is the only thing marking the active audit stage, so it stops
+     moving and holds the terracotta rather than disappearing. */
+  .legible-shimmer-text {
+    animation: none !important;
+    background-image: none;
+    color: var(--legible-orange);
+    -webkit-text-fill-color: var(--legible-orange);
+  }
+
+  /* A spinner still has to read as pending, so it keeps turning, slower. */
+  .animate-spin {
+    animation: ku-spin 1400ms linear infinite !important;
   }
 }
